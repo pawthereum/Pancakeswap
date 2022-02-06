@@ -169,7 +169,7 @@ const Swap = () => {
     if (!swapCallback) {
       return
     }
-    console.log('here we go!``````~~~~~~')
+
     setSwapState((prevState) => ({ ...prevState, attemptingTxn: true, swapErrorMessage: undefined, txHash: undefined }))
     swapCallback()
       .then((hash) => {
