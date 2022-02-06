@@ -1,6 +1,6 @@
 import { ChainId, JSBI, Percent, Token, WETH } from '@pancakeswap-libs/sdk'
 
-export const ROUTER_ADDRESS = '0x726d41AEA18feD2A961ee019325B319c7780E748'
+export const ROUTER_ADDRESS = '0x58c7028A02C8e73C3d2dC784bcd90BD849a94Bde'
 
 // a list of tokens by chain
 type ChainTokenList = {
@@ -14,6 +14,7 @@ export const BUSD = new Token(swapChainId, '0x78867BbEeF44f2326bF8DDd1941a443938
 export const USDT = new Token(swapChainId, '0x7ef95a0fee0dd31b22626fa2e10ee6a223f8a684', 18, 'USDT', 'Tether USD');
 export const ETH = new Token(swapChainId, '0x8babbb98678facc7342735486c851abd7a0d17ca', 18, 'ETH', 'Ethereum');
 export const WBNB = new Token(swapChainId, '0xae13d989dac2f0debff460ac112a837c89baa7cd', 18, 'WBNB', 'Wrapped BNB');
+export const PAWTH = new Token(swapChainId, '0x33ec6D5bdb757109C6929eB9c0B21c23f6a694a8', 9, 'PAWTH', 'Pawthereum')
 
 const WETH_ONLY: ChainTokenList = {
   [ChainId.MAINNET]: [WETH[ChainId.MAINNET]],
@@ -49,6 +50,7 @@ export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
 export const PINNED_PAIRS: { readonly [chainId in ChainId]?: [Token, Token][] } = {
   [swapChainId]: [
     [ BUSD, WBNB ],
+    [ WBNB, PAWTH],
     [ USDT, BUSD ],
     [ USDT, WBNB ],
     [ DAI, USDT ],
