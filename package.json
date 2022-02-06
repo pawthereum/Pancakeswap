@@ -1,7 +1,7 @@
 {
   "name": "@pancakeswap/interface",
   "description": "Pancakeswap Interface",
-  "homepage": ".",
+  "homepage": "https://pawthereum.github.io/Pancakeswap",
   "private": true,
   "dependencies": {
     "@binance-chain/bsc-connector": "^1.0.0",
@@ -72,6 +72,7 @@
     "@types/testing-library__cypress": "^5.0.8",
     "cypress": "^4.11.0",
     "eslint": "^7.22.0",
+    "gh-pages": "^3.2.3",
     "husky": "4.3.5",
     "prettier": "^2.1.2",
     "qs": "^6.10.0",
@@ -82,13 +83,15 @@
     "@walletconnect/web3-provider": "1.1.1-alpha.0"
   },
   "scripts": {
+    "predeploy": "DISABLE_ESLINT_PLUGIN=true npm run build",
+    "deploy": "DISABLE_ESLINT_PLUGIN=true gh-pages -d build",
     "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
     "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
     "test": "DISABLE_ESLINT_PLUGIN=true react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
-    "integration-test": "start-server-and-test 'serve build -l 3000' http://localhost:3000 'cypress run'"
+    "integration-test": "start-server-and-test 'serve build -l 3001' http://localhost:3001 'cypress run'"
   },
   "husky": {
     "hooks": {
