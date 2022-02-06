@@ -4,7 +4,7 @@ import { JSBI, Percent, Router, SwapParameters, Trade, TradeType } from '@pancak
 import { useMemo } from 'react'
 import { BIPS_BASE, DEFAULT_DEADLINE_FROM_NOW, INITIAL_ALLOWED_SLIPPAGE } from '../constants'
 import { useTransactionAdder } from '../state/transactions/hooks'
-import { calculateGasMargin, getRouterContract, isAddress, shortenAddress } from '../utils'
+import { calculateGasMargin, getRouterContract, getPawswapContract, isAddress, shortenAddress } from '../utils'
 import isZero from '../utils/isZero'
 import { useActiveWeb3React } from './index'
 import useENS from './useENS'
@@ -53,7 +53,9 @@ function useSwapCallArguments(
   return useMemo(() => {
     if (!trade || !recipient || !library || !account || !chainId) return []
 
-    const contract: Contract | null = getRouterContract(chainId, library, account)
+    // const contract: Contract | null = getRouterContract(chainId, library, account)
+    const contract: Contract | null = getPawswapContract(chainId, library, account)
+    console.log('contract', contract)
     if (!contract) {
       return []
     }
@@ -123,6 +125,7 @@ export function useSwapCallback(
               parameters: { methodName, args, value },
               contract,
             } = call
+            console.log('call', call)
             const options = !value || isZero(value) ? {} : { value }
 
             return contract.estimateGas[methodName](...args, options)
@@ -157,12 +160,14 @@ export function useSwapCallback(
               })
           })
         )
+        console.log('estimated calls', estimatedCalls)
 
         // a successful estimation is a bignumber gas estimate and the next call is also a bignumber gas estimate
         const successfulEstimation = estimatedCalls.find(
           (el, ix, list): el is SuccessfulCall =>
             'gasEstimate' in el && (ix === list.length - 1 || 'gasEstimate' in list[ix + 1])
         )
+        console.log('successful estimattion', successfulEstimation)
 
         if (!successfulEstimation) {
           const errorCalls = estimatedCalls.filter((call): call is FailedCall => 'error' in call)

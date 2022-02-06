@@ -169,6 +169,7 @@ const Swap = () => {
     if (!swapCallback) {
       return
     }
+    console.log('here we go!``````~~~~~~')
     setSwapState((prevState) => ({ ...prevState, attemptingTxn: true, swapErrorMessage: undefined, txHash: undefined }))
     swapCallback()
       .then((hash) => {
@@ -180,6 +181,7 @@ const Swap = () => {
         }))
       })
       .catch((error) => {
+        console.log('error', error)
         setSwapState((prevState) => ({
           ...prevState,
           attemptingTxn: false,
