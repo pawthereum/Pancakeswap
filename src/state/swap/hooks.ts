@@ -11,7 +11,7 @@ import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrencyBalances } from '../wallet/hooks'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
+import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax } from './actions'
 import { SwapState } from './reducer'
 
 import { useUserSlippageTolerance } from '../user/hooks'
@@ -19,6 +19,10 @@ import { computeSlippageAdjustedAmounts } from '../../utils/prices'
 
 export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)
+}
+
+async function getTaxes() {
+  new Promise(resolve => setTimeout(resolve, 2000));
 }
 
 export function useSwapActionHandlers(): {
@@ -29,7 +33,10 @@ export function useSwapActionHandlers(): {
 } {
   const dispatch = useDispatch<AppDispatch>()
   const onCurrencySelection = useCallback(
-    (field: Field, currency: Currency) => {
+    async (field: Field, currency: Currency) => {
+      console.log('setting total Tax!!!!!!')
+      const taxes = await getTaxes()
+      dispatch(setTotalTax({ totalTax: '75' }))
       dispatch(
         selectCurrency({
           field,
@@ -67,12 +74,16 @@ export function useSwapActionHandlers(): {
 }
 
 // try to parse a user entered amount for a given token
-export function tryParseAmount(value?: string, currency?: Currency): CurrencyAmount | undefined {
+export function tryParseAmount(value?: string, currency?: Currency, totalTax?: string | undefined): CurrencyAmount | undefined {
   if (!value || !currency) {
     return undefined
   }
   try {
-    const typedValueParsed = parseUnits(value, currency.decimals).toString()
+    console.log('~~~~~~~~~~TOTAL TAX: ', totalTax, '~~~~~~~~~')
+    const totalTaxParsed = !totalTax ? 0 : parseFloat(totalTax) / 100
+    const valueLessTaxes = (parseFloat(value) - parseFloat(value) * totalTaxParsed).toFixed(18).toString()
+    console.log('valueLessTaxes', valueLessTaxes)
+    const typedValueParsed = parseUnits(valueLessTaxes, currency.decimals).toString()
     if (typedValueParsed !== '0') {
       return currency instanceof Token
         ? new TokenAmount(currency, JSBI.BigInt(typedValueParsed))
@@ -116,6 +127,7 @@ export function useDerivedSwapInfo(): {
 
   const {
     independentField,
+    totalTax,
     typedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
@@ -133,7 +145,7 @@ export function useDerivedSwapInfo(): {
   ])
 
   const isExactIn: boolean = independentField === Field.INPUT
-  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
+  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined, totalTax)
 
   const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
@@ -248,6 +260,7 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
       currencyId: outputCurrency,
     },
     typedValue: parseTokenAmountURLParameter(parsedQs.exactAmount),
+    totalTax: '0',
     independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
     recipient,
   }
@@ -274,6 +287,7 @@ export function useDefaultsFromURLSearch():
         field: parsed.independentField,
         inputCurrencyId: parsed[Field.INPUT].currencyId,
         outputCurrencyId: parsed[Field.OUTPUT].currencyId,
+        totalTax: '0',
         recipient: parsed.recipient,
       })
     )

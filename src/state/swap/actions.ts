@@ -11,8 +11,10 @@ export const typeInput = createAction<{ field: Field; typedValue: string }>('swa
 export const replaceSwapState = createAction<{
   field: Field
   typedValue: string
+  totalTax: string
   inputCurrencyId?: string
   outputCurrencyId?: string
   recipient: string | null
 }>('swap/replaceSwapState')
 export const setRecipient = createAction<{ recipient: string | null }>('swap/setRecipient')
+export const setTotalTax = createAction<{ totalTax: string }>('swap/setTotalTax')

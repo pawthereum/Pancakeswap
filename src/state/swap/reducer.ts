@@ -1,8 +1,9 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
+import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax } from './actions'
 
 export interface SwapState {
   readonly independentField: Field
+  readonly totalTax: string
   readonly typedValue: string
   readonly [Field.INPUT]: {
     readonly currencyId: string | undefined
@@ -16,6 +17,7 @@ export interface SwapState {
 
 const initialState: SwapState = {
   independentField: Field.INPUT,
+  totalTax: '0',
   typedValue: '',
   [Field.INPUT]: {
     currencyId: '',
@@ -30,7 +32,8 @@ export default createReducer<SwapState>(initialState, (builder) =>
   builder
     .addCase(
       replaceSwapState,
-      (state, { payload: { typedValue, recipient, field, inputCurrencyId, outputCurrencyId } }) => {
+      (state, { payload: { totalTax, typedValue, recipient, field, inputCurrencyId, outputCurrencyId } }) => {
+        console.log('replace state', totalTax)
         return {
           [Field.INPUT]: {
             currencyId: inputCurrencyId,
@@ -39,12 +42,16 @@ export default createReducer<SwapState>(initialState, (builder) =>
             currencyId: outputCurrencyId,
           },
           independentField: field,
+          totalTax,
           typedValue,
           recipient,
         }
       }
     )
     .addCase(selectCurrency, (state, { payload: { currencyId, field } }) => {
+      console.log('select currency', {
+        ...state,
+      })
       const otherField = field === Field.INPUT ? Field.OUTPUT : Field.INPUT
       if (currencyId === state[otherField].currencyId) {
         // the case where we have to swap the order
@@ -62,6 +69,9 @@ export default createReducer<SwapState>(initialState, (builder) =>
       }
     })
     .addCase(switchCurrencies, (state) => {
+      console.log('switchCurrencies',{
+        ...state
+      })
       return {
         ...state,
         independentField: state.independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT,
@@ -70,6 +80,11 @@ export default createReducer<SwapState>(initialState, (builder) =>
       }
     })
     .addCase(typeInput, (state, { payload: { field, typedValue } }) => {
+      console.log('typeInput',{
+        ...state,
+        independentField: field,
+        typedValue,
+      })
       return {
         ...state,
         independentField: field,
@@ -77,6 +92,11 @@ export default createReducer<SwapState>(initialState, (builder) =>
       }
     })
     .addCase(setRecipient, (state, { payload: { recipient } }) => {
+      console.log('setRecipient')
       state.recipient = recipient
+    })
+    .addCase(setTotalTax, (state, { payload: { totalTax } }) => {
+      console.log('settotaltax')
+      state.totalTax = totalTax
     })
 )
