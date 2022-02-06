@@ -47,7 +47,7 @@ const BodyWrapper = styled.div`
 
   ${({ theme }) => theme.mediaQueries.lg} {
     background-image: url('/Pancakeswap/images/arch-${({ theme }) => (theme.isDark ? 'dark' : 'light')}.svg'),
-      url('/Pancakeswap/images/left-pancake.svg'), url('/Pancakeswap/images/right-pancake.svg');
+      url('/Pancakeswap/images/left-pawth.svg'), url('/Pancakeswap/images/right-supercat.svg');
     background-repeat: no-repeat;
     background-position: center 420px, 10% 230px, 90% 230px;
     background-size: contain, 266px, 266px;
