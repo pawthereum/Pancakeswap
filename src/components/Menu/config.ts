@@ -4,7 +4,7 @@ const config: MenuEntry[] = [
   {
     label: 'Pancake Home',
     icon: 'HomeIcon',
-    href: 'https://pancake.kiemtienonline360.com',
+    href: 'https://pawthereum.github.io/Pancakeswap',
   },
   {
     label: 'Trade',
