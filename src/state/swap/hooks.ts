@@ -8,11 +8,14 @@ import { useActiveWeb3React } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
 import useParsedQueryString from '../../hooks/useParsedQueryString'
-import { isAddress } from '../../utils'
+import { isAddress, getContract } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrencyBalances } from '../wallet/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax } from './actions'
 import { SwapState } from './reducer'
+
+import { usePawswapContract } from  '../../hooks/useContract'
+import { abi as ITaxStructureABI } from '../../constants/abis/taxStructure.json'
 
 import { useUserSlippageTolerance } from '../user/hooks'
 import { computeSlippageAdjustedAmounts } from '../../utils/prices'
@@ -21,31 +24,97 @@ export function useSwapState(): AppState['swap'] {
   return useSelector<AppState, AppState['swap']>((state) => state.swap)
 }
 
-async function getTaxes() {
-  new Promise(resolve => setTimeout(resolve, 2000));
-}
-
 export function useSwapActionHandlers(): {
   onCurrencySelection: (field: Field, currency: Currency) => void
   onSwitchTokens: () => void
   onUserInput: (field: Field, typedValue: string) => void
   onChangeRecipient: (recipient: string | null) => void
 } {
+  const pawswap = usePawswapContract(false)
+  const { library } = useActiveWeb3React()
+  
   const dispatch = useDispatch<AppDispatch>()
   const onCurrencySelection = useCallback(
     async (field: Field, currency: Currency) => {
       console.log('setting total Tax!!!!!!')
-      const taxes = await getTaxes()
+      const currencyUpdate = {
+        field,
+        currencyId: currency instanceof Token ? currency.address : currency === ETHER ? 'BNB' : '',
+      }
+      dispatch(selectCurrency(currencyUpdate))
+
+      console.log('checking...')
+      console.log('currency update', currencyUpdate.currencyId)
+      if (currencyUpdate.currencyId === 'BNB' ||
+          currencyUpdate.currencyId === 'ETH' ||
+          currencyUpdate.currencyId === '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd' // TESTNET BNB
+      ) return
+      console.log('passed!!')
+      const taxes = await getTaxes(currencyUpdate.currencyId)
       dispatch(setTotalTax({ totalTax: '75' }))
-      dispatch(
-        selectCurrency({
-          field,
-          currencyId: currency instanceof Token ? currency.address : currency === ETHER ? 'BNB' : '',
-        })
-      )
     },
     [dispatch]
   )
+
+  async function getTaxes(currencyId: string) {
+    // const { account, chainId, library } = useActiveWeb3React()
+    console.log('currencyId', currencyId)
+
+    const taxStructureAddress = await pawswap?.tokenTaxContracts(currencyId)
+    if (!library) return null
+    const taxStructure = getContract(taxStructureAddress, ITaxStructureABI, library, undefined)
+    console.log('tax structure', taxStructure)
+    const taxes = await Promise.all([
+      taxStructure.tax1Name(),
+      taxStructure.tax1BuyAmount(),
+      taxStructure.tax1SellAmount(),
+      taxStructure.tax2Name(),
+      taxStructure.tax2BuyAmount(),
+      taxStructure.tax2SellAmount(),
+      taxStructure.tax3Name(),
+      taxStructure.tax3BuyAmount(),
+      taxStructure.tax3SellAmount(),
+      taxStructure.tax4Name(),
+      taxStructure.tax4BuyAmount(),
+      taxStructure.tax4SellAmount(),
+      taxStructure.tokenTaxName(),
+      taxStructure.tokenTaxBuyAmount(),
+      taxStructure.tokenTaxSellAmount(),
+      taxStructure.liquidityTaxBuyAmount(),
+      taxStructure.liquidityTaxSellAmount(),
+      taxStructure.burnTaxBuyAmount(),
+      taxStructure.burnTaxSellAmount(),
+      taxStructure.customTaxName(),
+      taxStructure.feeDecimal()
+    ]).then(([
+      tax1Name, tax1BuyAmount, tax1SellAmount,
+      tax2Name, tax2BuyAmount, tax2SellAmount,
+      tax3Name, tax3BuyAmount, tax3SellAmount,
+      tax4Name, tax4BuyAmount, tax4SellAmount,
+      tokenTaxName, tokenTaxBuyAmount, tokenTaxSellAmount,
+      liquidityTaxBuyAmount, liqudityTaxSellAmount,
+      burnTaxBuyAmount, burnTaxSellAmount,
+      customTaxName, feeDecimal
+    ]) => {
+      console.log('got it')
+    })
+    console.log('taxes', taxes)
+    
+    // const taxStructureContract = await taxStructure(taxStructureAddress, false)
+    // console.log('taxStructureContract', taxStructure)
+    // const taxes = await Promise.all([
+
+    // ])
+    // const taxStructure = getTaxStructureContract(chainId, library, account)
+  
+    // console.log('tax structure', taxStructure)
+    return new Promise(resolve => setTimeout(resolve, 2000));
+  }
+
+  // async function getTaxStructureAddress(tokenAddress: string) {
+  //   // console.log('pawswap', pawswap)
+  //   //0x9aE4AB89841DAf1B174cD9dbA10F8a493531d651
+  // }
 
   const onSwitchTokens = useCallback(() => {
     dispatch(switchCurrencies())

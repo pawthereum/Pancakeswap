@@ -7,6 +7,9 @@ import ENS_PUBLIC_RESOLVER_ABI from '../constants/abis/ens-public-resolver.json'
 import { ERC20_BYTES32_ABI } from '../constants/abis/erc20'
 import ERC20_ABI from '../constants/abis/erc20.json'
 import WETH_ABI from '../constants/abis/weth.json'
+import { abi as ITaxStructureABI } from '../constants/abis/taxStructure.json'
+import { abi as IPawswapABI } from '../constants/abis/pawswap.json'
+import { PAWSWAP_ADDRESS } from '../constants'
 import { MULTICALL_ABI, MULTICALL_NETWORKS } from '../constants/multicall'
 import { getContract } from '../utils'
 import { useActiveWeb3React } from './index'
@@ -28,6 +31,14 @@ function useContract(address: string | undefined, ABI: any, withSignerIfPossible
 
 export function useTokenContract(tokenAddress?: string, withSignerIfPossible?: boolean): Contract | null {
   return useContract(tokenAddress, ERC20_ABI, withSignerIfPossible)
+}
+
+export function usePawswapContract(withSignerIfPossible?: boolean): Contract | null {
+  return useContract(PAWSWAP_ADDRESS, IPawswapABI, withSignerIfPossible)
+}
+
+export function useTaxStructureContract(address?: string, withSignerIfPossible?: boolean): Contract | null {
+  return useContract(address, ITaxStructureABI, withSignerIfPossible)
 }
 
 export function useWETHContract(withSignerIfPossible?: boolean): Contract | null {
