@@ -11,7 +11,6 @@ import CurrencyInputPanel from 'components/CurrencyInputPanel'
 import CardNav from 'components/CardNav'
 import { AutoRow, RowBetween } from 'components/Row'
 import AdvancedSwapDetailsDropdown from 'components/swap/AdvancedSwapDetailsDropdown'
-import TaxSwapDetailsDropdown from 'components/swap/TaxSwapDetailsDropdown'
 import confirmPriceImpactWithoutFee from 'components/swap/confirmPriceImpactWithoutFee'
 import { ArrowWrapper, BottomGrouping, SwapCallbackError, Wrapper } from 'components/swap/styleds'
 import TradePrice from 'components/swap/TradePrice'
@@ -70,8 +69,6 @@ const Swap = () => {
   // get custom setting values for user
   const [deadline] = useUserDeadline()
   const [allowedSlippage] = useUserSlippageTolerance()
-
-  const [totalTax, setTotalTax] = useState('0')
 
   // swap state
   const { independentField, typedValue, recipient } = useSwapState()
@@ -473,7 +470,6 @@ const Swap = () => {
         </Wrapper>
       </AppBody>
       <AdvancedSwapDetailsDropdown trade={trade} />
-      <TaxSwapDetailsDropdown trade={trade} />
     </>
   )
 }

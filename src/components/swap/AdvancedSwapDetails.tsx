@@ -11,12 +11,27 @@ import { RowBetween, RowFixed } from '../Row'
 import FormattedPriceImpact from './FormattedPriceImpact'
 import { SectionBreak } from './styleds'
 import SwapRoute from './SwapRoute'
+import { useSwapState } from 'state/swap/hooks'
+import styled from 'styled-components'
 
 function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippage: number }) {
   const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdown(trade)
   const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
   const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
   const TranslateString = useI18n()
+  const { taxes, INPUT, OUTPUT } = useSwapState()
+  const testnetBnb = '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd'
+  let isBuy = true
+  if (INPUT.currencyId !== testnetBnb) {
+    isBuy = false
+  }
+  const taxType = isBuy ? 'buyAmount' : 'sellAmount'
+
+  const StyledRowDivider = styled.div`
+    border-bottom: 1px solid ${({ theme }) => theme.colors.borderColor};
+    padding: 5px;
+    margin-bottom: 10px;
+  `
 
   return (
     <Card>
@@ -70,6 +85,23 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
             {realizedLPFee ? `${realizedLPFee.toSignificant(4)} ${trade.inputAmount.currency.symbol}` : '-'}
           </Text>
         </RowBetween>
+        <StyledRowDivider></StyledRowDivider>
+        { !taxes ? '' : taxes.filter(t => t[taxType] !== '0%').map((t, i) => {
+            return (
+              <RowBetween key={i}>
+                <RowFixed>
+                  <Text fontSize={t['isTotal'] ? "16px" : "14px"}>
+                    { TranslateString(1210, t['name']) }
+                  </Text>
+                </RowFixed>
+                <RowFixed>
+                  <Text fontSize={t['isTotal'] ? "16px" : "14px"}>
+                    { t[taxType] }
+                  </Text>
+                </RowFixed>
+              </RowBetween>
+            )
+          })}
       </CardBody>
     </Card>
   )

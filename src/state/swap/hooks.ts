@@ -11,7 +11,7 @@ import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress, getContract } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrencyBalances } from '../wallet/hooks'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax } from './actions'
+import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax, setTaxes } from './actions'
 import { SwapState } from './reducer'
 
 import { usePawswapContract } from  '../../hooks/useContract'
@@ -36,35 +36,33 @@ export function useSwapActionHandlers(): {
   const dispatch = useDispatch<AppDispatch>()
   const onCurrencySelection = useCallback(
     async (field: Field, currency: Currency) => {
-      console.log('setting total Tax!!!!!!')
       const currencyUpdate = {
         field,
         currencyId: currency instanceof Token ? currency.address : currency === ETHER ? 'BNB' : '',
       }
       dispatch(selectCurrency(currencyUpdate))
 
-      console.log('checking...')
-      console.log('currency update', currencyUpdate.currencyId)
       if (currencyUpdate.currencyId === 'BNB' ||
           currencyUpdate.currencyId === 'ETH' ||
           currencyUpdate.currencyId === '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd' // TESTNET BNB
       ) return
-      console.log('passed!!')
       const taxes = await getTaxes(currencyUpdate.currencyId)
-      dispatch(setTotalTax({ totalTax: '75' }))
+      console.log('taxes', taxes)
+      const totalTax = taxes.find(t => t.isTotal)
+      dispatch(setTotalTax({ totalTax: field == 'INPUT' ? totalTax.sellAmount.replace('%', '') : totalTax.buyAmount.replace('%', '') }))
+      dispatch(setTaxes({ taxes }))
+      // dispatch(setTaxes({ taxes: field === 'INPUT' ? taxes.filter(t => {
+      //   t.
+      // })}))
     },
     [dispatch]
   )
 
   async function getTaxes(currencyId: string) {
-    // const { account, chainId, library } = useActiveWeb3React()
-    console.log('currencyId', currencyId)
-
     const taxStructureAddress = await pawswap?.tokenTaxContracts(currencyId)
     if (!library) return null
     const taxStructure = getContract(taxStructureAddress, ITaxStructureABI, library, undefined)
-    console.log('tax structure', taxStructure)
-    const taxes = await Promise.all([
+    return await Promise.all([
       taxStructure.tax1Name(),
       taxStructure.tax1BuyAmount(),
       taxStructure.tax1SellAmount(),
@@ -92,32 +90,92 @@ export function useSwapActionHandlers(): {
       tax3Name, tax3BuyAmount, tax3SellAmount,
       tax4Name, tax4BuyAmount, tax4SellAmount,
       tokenTaxName, tokenTaxBuyAmount, tokenTaxSellAmount,
-      liquidityTaxBuyAmount, liqudityTaxSellAmount,
+      liquidityTaxBuyAmount, liquidityTaxSellAmount,
       burnTaxBuyAmount, burnTaxSellAmount,
       customTaxName, feeDecimal
     ]) => {
       console.log('got it')
+      const taxes = [
+        {
+          name: tax1Name,
+          buyAmount: parseFloat(tax1BuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tax1SellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: tax2Name,
+          buyAmount: parseFloat(tax2BuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tax2SellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: tax3Name,
+          buyAmount: parseFloat(tax3BuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tax3SellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: tax4Name,
+          buyAmount: parseFloat(tax4BuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tax4SellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: tokenTaxName,
+          buyAmount: parseFloat(tokenTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tokenTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          isLiquidityTax: true,
+          name: 'Liquidity Tax',
+          buyAmount: parseFloat(liquidityTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(liquidityTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: 'Burn Tax',
+          buyAmount: parseFloat(burnTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(burnTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: customTaxName,
+          isCustom: true,
+          isTotal: false,
+          buyAmount: '0%',
+          sellAmount: '0%',
+        }
+      ]
+      const totals = {
+        name: 'Total Tax',
+        isCustom: false,
+        isTotal: true,
+        buyAmount: taxes.reduce(function (p, t) {
+          if (!t.buyAmount) return p + 0
+          return p + parseFloat(t?.buyAmount?.replace('%', ''))
+        }, 0) + '%',
+        sellAmount: taxes.reduce(function (p, t) {
+          if (!t.sellAmount) return p + 0
+          return p + parseFloat(t?.sellAmount?.replace('%', ''))
+        }, 0) + '%',
+      }
+      taxes.push(totals)
+      return taxes
     })
-    console.log('taxes', taxes)
-    
-    // const taxStructureContract = await taxStructure(taxStructureAddress, false)
-    // console.log('taxStructureContract', taxStructure)
-    // const taxes = await Promise.all([
-
-    // ])
-    // const taxStructure = getTaxStructureContract(chainId, library, account)
-  
-    // console.log('tax structure', taxStructure)
-    return new Promise(resolve => setTimeout(resolve, 2000));
+    .catch(err => err)
   }
-
-  // async function getTaxStructureAddress(tokenAddress: string) {
-  //   // console.log('pawswap', pawswap)
-  //   //0x9aE4AB89841DAf1B174cD9dbA10F8a493531d651
-  // }
 
   const onSwitchTokens = useCallback(() => {
     dispatch(switchCurrencies())
+    // TODO: flip buy and sell taxes
   }, [dispatch])
 
   const onUserInput = useCallback(
@@ -197,6 +255,7 @@ export function useDerivedSwapInfo(): {
   const {
     independentField,
     totalTax,
+    taxes,
     typedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
@@ -330,6 +389,7 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
     },
     typedValue: parseTokenAmountURLParameter(parsedQs.exactAmount),
     totalTax: '0',
+    taxes: [],
     independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
     recipient,
   }
@@ -357,6 +417,7 @@ export function useDefaultsFromURLSearch():
         inputCurrencyId: parsed[Field.INPUT].currencyId,
         outputCurrencyId: parsed[Field.OUTPUT].currencyId,
         totalTax: '0',
+        taxes: [],
         recipient: parsed.recipient,
       })
     )

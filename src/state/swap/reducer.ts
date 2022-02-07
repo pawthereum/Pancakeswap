@@ -1,10 +1,11 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax } from './actions'
+import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax, setTaxes } from './actions'
 
 export interface SwapState {
   readonly independentField: Field
   readonly totalTax: string
   readonly typedValue: string
+  readonly taxes: Array<{}>
   readonly [Field.INPUT]: {
     readonly currencyId: string | undefined
   }
@@ -18,6 +19,7 @@ export interface SwapState {
 const initialState: SwapState = {
   independentField: Field.INPUT,
   totalTax: '0',
+  taxes: [],
   typedValue: '',
   [Field.INPUT]: {
     currencyId: '',
@@ -32,7 +34,7 @@ export default createReducer<SwapState>(initialState, (builder) =>
   builder
     .addCase(
       replaceSwapState,
-      (state, { payload: { totalTax, typedValue, recipient, field, inputCurrencyId, outputCurrencyId } }) => {
+      (state, { payload: { totalTax, taxes, typedValue, recipient, field, inputCurrencyId, outputCurrencyId } }) => {
         console.log('replace state', totalTax)
         return {
           [Field.INPUT]: {
@@ -43,6 +45,7 @@ export default createReducer<SwapState>(initialState, (builder) =>
           },
           independentField: field,
           totalTax,
+          taxes,
           typedValue,
           recipient,
         }
@@ -98,5 +101,10 @@ export default createReducer<SwapState>(initialState, (builder) =>
     .addCase(setTotalTax, (state, { payload: { totalTax } }) => {
       console.log('settotaltax')
       state.totalTax = totalTax
+    })
+    .addCase(setTaxes, (state, { payload: { taxes } }) => {
+      console.log('setting all taxes in state', taxes)
+      state.taxes = taxes
+      console.log('state taxes', state.taxes)
     })
 )
