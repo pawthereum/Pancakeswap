@@ -8,11 +8,14 @@ import { useActiveWeb3React } from '../../hooks'
 import { useCurrency } from '../../hooks/Tokens'
 import { useTradeExactIn, useTradeExactOut } from '../../hooks/Trades'
 import useParsedQueryString from '../../hooks/useParsedQueryString'
-import { isAddress } from '../../utils'
+import { isAddress, getContract } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrencyBalances } from '../wallet/hooks'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
+import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax, setTaxes } from './actions'
 import { SwapState } from './reducer'
+
+import { usePawswapContract } from  '../../hooks/useContract'
+import { abi as ITaxStructureABI } from '../../constants/abis/taxStructure.json'
 
 import { useUserSlippageTolerance } from '../user/hooks'
 import { computeSlippageAdjustedAmounts } from '../../utils/prices'
@@ -27,21 +30,152 @@ export function useSwapActionHandlers(): {
   onUserInput: (field: Field, typedValue: string) => void
   onChangeRecipient: (recipient: string | null) => void
 } {
+  const pawswap = usePawswapContract(false)
+  const { library } = useActiveWeb3React()
+  
   const dispatch = useDispatch<AppDispatch>()
   const onCurrencySelection = useCallback(
-    (field: Field, currency: Currency) => {
-      dispatch(
-        selectCurrency({
-          field,
-          currencyId: currency instanceof Token ? currency.address : currency === ETHER ? 'BNB' : '',
-        })
-      )
+    async (field: Field, currency: Currency) => {
+      const currencyUpdate = {
+        field,
+        currencyId: currency instanceof Token ? currency.address : currency === ETHER ? 'BNB' : '',
+      }
+      dispatch(selectCurrency(currencyUpdate))
+
+      if (currencyUpdate.currencyId === 'BNB' ||
+          currencyUpdate.currencyId === 'ETH' ||
+          currencyUpdate.currencyId === '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd' // TESTNET BNB
+      ) return
+      const taxes = await getTaxes(currencyUpdate.currencyId)
+      console.log('taxes', taxes)
+      const totalTax = taxes.find(t => t.isTotal)
+      dispatch(setTotalTax({ totalTax: field == 'INPUT' ? totalTax.sellAmount.replace('%', '') : totalTax.buyAmount.replace('%', '') }))
+      dispatch(setTaxes({ taxes }))
+      // dispatch(setTaxes({ taxes: field === 'INPUT' ? taxes.filter(t => {
+      //   t.
+      // })}))
     },
     [dispatch]
   )
 
+  async function getTaxes(currencyId: string) {
+    const taxStructureAddress = await pawswap?.tokenTaxContracts(currencyId)
+    if (!library) return null
+    const taxStructure = getContract(taxStructureAddress, ITaxStructureABI, library, undefined)
+    return await Promise.all([
+      taxStructure.tax1Name(),
+      taxStructure.tax1BuyAmount(),
+      taxStructure.tax1SellAmount(),
+      taxStructure.tax2Name(),
+      taxStructure.tax2BuyAmount(),
+      taxStructure.tax2SellAmount(),
+      taxStructure.tax3Name(),
+      taxStructure.tax3BuyAmount(),
+      taxStructure.tax3SellAmount(),
+      taxStructure.tax4Name(),
+      taxStructure.tax4BuyAmount(),
+      taxStructure.tax4SellAmount(),
+      taxStructure.tokenTaxName(),
+      taxStructure.tokenTaxBuyAmount(),
+      taxStructure.tokenTaxSellAmount(),
+      taxStructure.liquidityTaxBuyAmount(),
+      taxStructure.liquidityTaxSellAmount(),
+      taxStructure.burnTaxBuyAmount(),
+      taxStructure.burnTaxSellAmount(),
+      taxStructure.customTaxName(),
+      taxStructure.feeDecimal()
+    ]).then(([
+      tax1Name, tax1BuyAmount, tax1SellAmount,
+      tax2Name, tax2BuyAmount, tax2SellAmount,
+      tax3Name, tax3BuyAmount, tax3SellAmount,
+      tax4Name, tax4BuyAmount, tax4SellAmount,
+      tokenTaxName, tokenTaxBuyAmount, tokenTaxSellAmount,
+      liquidityTaxBuyAmount, liquidityTaxSellAmount,
+      burnTaxBuyAmount, burnTaxSellAmount,
+      customTaxName, feeDecimal
+    ]) => {
+      console.log('got it')
+      const taxes = [
+        {
+          name: tax1Name,
+          buyAmount: parseFloat(tax1BuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tax1SellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: tax2Name,
+          buyAmount: parseFloat(tax2BuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tax2SellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: tax3Name,
+          buyAmount: parseFloat(tax3BuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tax3SellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: tax4Name,
+          buyAmount: parseFloat(tax4BuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tax4SellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: tokenTaxName,
+          buyAmount: parseFloat(tokenTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(tokenTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          isLiquidityTax: true,
+          name: 'Liquidity Tax',
+          buyAmount: parseFloat(liquidityTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(liquidityTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: 'Burn Tax',
+          buyAmount: parseFloat(burnTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
+          sellAmount: parseFloat(burnTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
+          isTotal: false,
+          isCustom: false
+        },
+        {
+          name: customTaxName,
+          isCustom: true,
+          isTotal: false,
+          buyAmount: '0%',
+          sellAmount: '0%',
+        }
+      ]
+      const totals = {
+        name: 'Total Tax',
+        isCustom: false,
+        isTotal: true,
+        buyAmount: taxes.reduce(function (p, t) {
+          if (!t.buyAmount) return p + 0
+          return p + parseFloat(t?.buyAmount?.replace('%', ''))
+        }, 0) + '%',
+        sellAmount: taxes.reduce(function (p, t) {
+          if (!t.sellAmount) return p + 0
+          return p + parseFloat(t?.sellAmount?.replace('%', ''))
+        }, 0) + '%',
+      }
+      taxes.push(totals)
+      return taxes
+    })
+    .catch(err => err)
+  }
+
   const onSwitchTokens = useCallback(() => {
     dispatch(switchCurrencies())
+    // TODO: flip buy and sell taxes
   }, [dispatch])
 
   const onUserInput = useCallback(
@@ -67,12 +201,16 @@ export function useSwapActionHandlers(): {
 }
 
 // try to parse a user entered amount for a given token
-export function tryParseAmount(value?: string, currency?: Currency): CurrencyAmount | undefined {
+export function tryParseAmount(value?: string, currency?: Currency, totalTax?: string | undefined): CurrencyAmount | undefined {
   if (!value || !currency) {
     return undefined
   }
   try {
-    const typedValueParsed = parseUnits(value, currency.decimals).toString()
+    console.log('~~~~~~~~~~TOTAL TAX: ', totalTax, '~~~~~~~~~')
+    const totalTaxParsed = !totalTax ? 0 : parseFloat(totalTax) / 100
+    const valueLessTaxes = (parseFloat(value) - parseFloat(value) * totalTaxParsed).toFixed(18).toString()
+    console.log('valueLessTaxes', valueLessTaxes)
+    const typedValueParsed = parseUnits(valueLessTaxes, currency.decimals).toString()
     if (typedValueParsed !== '0') {
       return currency instanceof Token
         ? new TokenAmount(currency, JSBI.BigInt(typedValueParsed))
@@ -116,6 +254,8 @@ export function useDerivedSwapInfo(): {
 
   const {
     independentField,
+    totalTax,
+    taxes,
     typedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
@@ -133,7 +273,7 @@ export function useDerivedSwapInfo(): {
   ])
 
   const isExactIn: boolean = independentField === Field.INPUT
-  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
+  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined, totalTax)
 
   const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
@@ -248,6 +388,8 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
       currencyId: outputCurrency,
     },
     typedValue: parseTokenAmountURLParameter(parsedQs.exactAmount),
+    totalTax: '0',
+    taxes: [],
     independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
     recipient,
   }
@@ -274,6 +416,8 @@ export function useDefaultsFromURLSearch():
         field: parsed.independentField,
         inputCurrencyId: parsed[Field.INPUT].currencyId,
         outputCurrencyId: parsed[Field.OUTPUT].currencyId,
+        totalTax: '0',
+        taxes: [],
         recipient: parsed.recipient,
       })
     )

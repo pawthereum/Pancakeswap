@@ -169,6 +169,7 @@ const Swap = () => {
     if (!swapCallback) {
       return
     }
+
     setSwapState((prevState) => ({ ...prevState, attemptingTxn: true, swapErrorMessage: undefined, txHash: undefined }))
     swapCallback()
       .then((hash) => {
@@ -180,6 +181,7 @@ const Swap = () => {
         }))
       })
       .catch((error) => {
+        console.log('error', error)
         setSwapState((prevState) => ({
           ...prevState,
           attemptingTxn: false,
@@ -285,8 +287,8 @@ const Swap = () => {
             onDismiss={handleConfirmDismiss}
           />
           <PageHeader
-            title={TranslateString(8, 'Exchange')}
-            description={TranslateString(1192, 'Trade tokens in an instant')}
+            title={TranslateString(8, 'PawSwap')}
+            description={TranslateString(1192, 'by Pawthereum')}
           />
           <CardBody>
             <AutoColumn gap="md">
