@@ -23,12 +23,14 @@ const PriceInfoText = styled(Text)`
 
 export default function SwapModalHeader({
   trade,
+  tradeWithTax,
   allowedSlippage,
   recipient,
   showAcceptChanges,
   onAcceptChanges,
 }: {
   trade: Trade
+  tradeWithTax: Trade | undefined
   allowedSlippage: number
   recipient: string | null
   showAcceptChanges: boolean
@@ -36,6 +38,10 @@ export default function SwapModalHeader({
 }) {
   const slippageAdjustedAmounts = useMemo(() => computeSlippageAdjustedAmounts(trade, allowedSlippage), [
     trade,
+    allowedSlippage,
+  ])
+  const slippageAdjustedAmountsWithTax = useMemo(() => computeSlippageAdjustedAmounts(trade, allowedSlippage), [
+    tradeWithTax,
     allowedSlippage,
   ])
   const { priceImpactWithoutFee } = useMemo(() => computeTradePriceBreakdown(trade), [trade])
@@ -52,7 +58,11 @@ export default function SwapModalHeader({
             fontSize="24px"
             color={showAcceptChanges && trade.tradeType === TradeType.EXACT_OUTPUT ? theme.colors.primary : 'text'}
           >
-            {trade.inputAmount.toSignificant(6)}
+            { 
+              trade.tradeType === TradeType.EXACT_OUTPUT ?
+              tradeWithTax?.inputAmount.toSignificant(6) :
+              trade.inputAmount.toSignificant(6)
+            }
           </Text>
         </RowFixed>
         <RowFixed gap="0px">
@@ -78,7 +88,11 @@ export default function SwapModalHeader({
                 : 'text'
             }
           >
-            {trade.outputAmount.toSignificant(6)}
+            { 
+              trade.tradeType === TradeType.EXACT_INPUT ?
+              tradeWithTax?.outputAmount.toSignificant(6) :
+              trade.outputAmount.toSignificant(6)
+            }
           </Text>
         </RowFixed>
         <RowFixed gap="0px">
@@ -103,7 +117,7 @@ export default function SwapModalHeader({
           <PriceInfoText>
             {`Output is estimated. You will receive at least `}
             <span>
-              {slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(6)} {trade.outputAmount.currency.symbol}
+              {tradeWithTax?.outputAmount.toSignificant(6)} {tradeWithTax?.outputAmount.currency.symbol}
             </span>
             {' or the transaction will revert.'}
           </PriceInfoText>
@@ -111,7 +125,7 @@ export default function SwapModalHeader({
           <PriceInfoText>
             {`Input is estimated. You will sell at most `}
             <span>
-              {slippageAdjustedAmounts[Field.INPUT]?.toSignificant(6)} {trade.inputAmount.currency.symbol}
+              {tradeWithTax?.inputAmount.toSignificant(6)} {tradeWithTax?.inputAmount.currency.symbol}
             </span>
             {' or the transaction will revert.'}
           </PriceInfoText>

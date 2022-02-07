@@ -24,6 +24,7 @@ function tradeMeaningfullyDiffers(tradeA: Trade, tradeB: Trade): boolean {
 
 export default function ConfirmSwapModal({
   trade,
+  tradeWithTax,
   originalTrade,
   onAcceptChanges,
   allowedSlippage,
@@ -37,6 +38,7 @@ export default function ConfirmSwapModal({
 }: {
   isOpen: boolean
   trade: Trade | undefined
+  tradeWithTax: Trade | undefined
   originalTrade: Trade | undefined
   attemptingTxn: boolean
   txHash: string | undefined
@@ -56,6 +58,7 @@ export default function ConfirmSwapModal({
     return trade ? (
       <SwapModalHeader
         trade={trade}
+        tradeWithTax={tradeWithTax}
         allowedSlippage={allowedSlippage}
         recipient={recipient}
         showAcceptChanges={showAcceptChanges}
@@ -69,6 +72,7 @@ export default function ConfirmSwapModal({
       <SwapModalFooter
         onConfirm={onConfirm}
         trade={trade}
+        tradeWithTax={tradeWithTax}
         disabledConfirm={showAcceptChanges}
         swapErrorMessage={swapErrorMessage}
         allowedSlippage={allowedSlippage}

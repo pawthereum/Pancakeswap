@@ -72,7 +72,7 @@ const Swap = () => {
 
   // swap state
   const { independentField, typedValue, recipient } = useSwapState()
-  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
+  const { v2Trade, v2TradeWithTax, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
   const { wrapType, execute: onWrap, inputError: wrapInputError } = useWrapCallback(
     currencies[Field.INPUT],
     currencies[Field.OUTPUT],
@@ -80,6 +80,7 @@ const Swap = () => {
   )
   const showWrap: boolean = wrapType !== WrapType.NOT_APPLICABLE
   const trade = showWrap ? undefined : v2Trade
+  const tradeWithTax = showWrap ? undefined : v2TradeWithTax
 
   const parsedAmounts = showWrap
     ? {
@@ -87,8 +88,8 @@ const Swap = () => {
         [Field.OUTPUT]: parsedAmount,
       }
     : {
-        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
-        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount,
+        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : tradeWithTax?.inputAmount,
+        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : tradeWithTax?.outputAmount,
       }
 
   const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useSwapActionHandlers()
@@ -276,6 +277,7 @@ const Swap = () => {
           <ConfirmSwapModal
             isOpen={showConfirm}
             trade={trade}
+            tradeWithTax={tradeWithTax}
             originalTrade={tradeToConfirm}
             onAcceptChanges={handleAcceptChanges}
             attemptingTxn={attemptingTxn}
@@ -469,7 +471,7 @@ const Swap = () => {
           </CardBody>
         </Wrapper>
       </AppBody>
-      <AdvancedSwapDetailsDropdown trade={trade} />
+      <AdvancedSwapDetailsDropdown trade={trade} tradeWithTax={tradeWithTax} />
     </>
   )
 }

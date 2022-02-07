@@ -20,7 +20,7 @@ const StyledRowDivider = styled.div`
   margin-bottom: 10px;
 `
 
-function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippage: number }) {
+function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; tradeWithTax: Trade, allowedSlippage: number }) {
   const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdown(trade)
   const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
   const { totalTax, taxes, INPUT, OUTPUT } = useSwapState()
@@ -52,7 +52,7 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
           <RowFixed>
             <Text fontSize="14px">
               {isExactIn
-                ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${trade.outputAmount.currency.symbol}` ??
+                ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${tradeWithTax.outputAmount.currency.symbol}` ??
                   '-'
                 : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade.inputAmount.currency.symbol}` ??
                   '-'}
@@ -110,9 +110,10 @@ function TradeSummary({ trade, allowedSlippage }: { trade: Trade; allowedSlippag
 
 export interface AdvancedSwapDetailsProps {
   trade?: Trade
+  tradeWithTax?: Trade
 }
 
-export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
+export function AdvancedSwapDetails({ trade, tradeWithTax }: AdvancedSwapDetailsProps) {
   const [allowedSlippage] = useUserSlippageTolerance()
   const TranslateString = useI18n()
   const showRoute = Boolean(trade && trade.route.path.length > 2)
@@ -121,7 +122,7 @@ export function AdvancedSwapDetails({ trade }: AdvancedSwapDetailsProps) {
     <AutoColumn gap="md">
       {trade && (
         <>
-          <TradeSummary trade={trade} allowedSlippage={allowedSlippage} />
+          <TradeSummary trade={trade} tradeWithTax={tradeWithTax ? tradeWithTax : trade} allowedSlippage={allowedSlippage} />
           {showRoute && (
             <>
               <SectionBreak />

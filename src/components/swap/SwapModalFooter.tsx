@@ -19,12 +19,14 @@ import { StyledBalanceMaxMini, SwapCallbackError } from './styleds'
 
 export default function SwapModalFooter({
   trade,
+  tradeWithTax,
   onConfirm,
   allowedSlippage,
   swapErrorMessage,
   disabledConfirm,
 }: {
   trade: Trade
+  tradeWithTax: Trade | undefined
   allowedSlippage: number
   onConfirm: () => void
   swapErrorMessage: string | undefined
@@ -34,6 +36,10 @@ export default function SwapModalFooter({
   const slippageAdjustedAmounts = useMemo(() => computeSlippageAdjustedAmounts(trade, allowedSlippage), [
     allowedSlippage,
     trade,
+  ])
+  const slippageAdjustedAmountsWithTax = useMemo(() => computeSlippageAdjustedAmounts(trade, allowedSlippage), [
+    allowedSlippage,
+    tradeWithTax,
   ])
   const { priceImpactWithoutFee, realizedLPFee } = useMemo(() => computeTradePriceBreakdown(trade), [trade])
   const severity = warningSeverity(priceImpactWithoutFee)
@@ -79,12 +85,12 @@ export default function SwapModalFooter({
           <RowFixed>
             <Text fontSize="14px">
               {trade.tradeType === TradeType.EXACT_INPUT
-                ? slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4) ?? '-'
-                : slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4) ?? '-'}
+                ? tradeWithTax?.outputAmount.toSignificant(4) ?? '-'
+                : tradeWithTax?.inputAmount.toSignificant(4) ?? '-'}
             </Text>
             <Text fontSize="14px" marginLeft="4px">
               {trade.tradeType === TradeType.EXACT_INPUT
-                ? trade.outputAmount.currency.symbol
+                ? tradeWithTax?.outputAmount.currency.symbol
                 : trade.inputAmount.currency.symbol}
             </Text>
           </RowFixed>

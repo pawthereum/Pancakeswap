@@ -1,5 +1,5 @@
 import { parseUnits } from '@ethersproject/units'
-import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade } from '@pancakeswap-libs/sdk'
+import { Currency, CurrencyAmount, ETHER, Fraction, JSBI, Token, TokenAmount, Trade } from '@pancakeswap-libs/sdk'
 import { ParsedQs } from 'qs'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -249,6 +249,7 @@ export function useDerivedSwapInfo(): {
   currencyBalances: { [field in Field]?: CurrencyAmount }
   parsedAmount: CurrencyAmount | undefined
   v2Trade: Trade | undefined
+  v2TradeWithTax: Trade | undefined
   inputError?: string
 } {
   const { account } = useActiveWeb3React()
@@ -280,6 +281,21 @@ export function useDerivedSwapInfo(): {
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
 
   const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
+
+  // do the same thing but account for tax -- get rid of above when we can
+  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) : 0
+  const typedValueAfterTax = !typedValue ? '0' : (parseFloat(typedValue) * ((100 - totalTaxNumber) / 100)).toFixed(9).toString()
+
+  const parsedAmountPostTax = tryParseAmount(typedValueAfterTax, (isExactIn ? inputCurrency : outputCurrency) ?? undefined, totalTax)
+  const bestTradeTaxedExactIn = useTradeExactIn(isExactIn ? parsedAmountPostTax : undefined, outputCurrency ?? undefined)
+  const bestTradeTaxedExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmountPostTax : undefined)
+  const v2TradeWithTax = isExactIn ? bestTradeTaxedExactIn : bestTradeTaxedExactOut
+  // end of doing the same thing
+  // const newTrade = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? remainingAfterTax : undefined)
+  // console.log('total tax num', totalTaxNumber)
+  // console.log(totalTaxFraction)
+  // console.log('remaining', remainingAfterTax)
+  // console.log('parsed amount', parsedAmount)
 
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
@@ -316,9 +332,9 @@ export function useDerivedSwapInfo(): {
   }
 
   const [allowedSlippage] = useUserSlippageTolerance()
-  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) * 100 : 0
+  const totalTaxBips = totalTaxNumber * 100
 
-  const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage + totalTaxNumber)
+  const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage + totalTaxBips)
   // compare input balance to max input based on version
   const [balanceIn, amountIn] = [
     currencyBalances[Field.INPUT],
@@ -334,6 +350,7 @@ export function useDerivedSwapInfo(): {
     currencyBalances,
     parsedAmount,
     v2Trade: v2Trade ?? undefined,
+    v2TradeWithTax: v2TradeWithTax ?? undefined,
     inputError,
   }
 }
