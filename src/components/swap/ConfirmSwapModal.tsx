@@ -1,4 +1,4 @@
-import { currencyEquals, Trade } from '@pancakeswap-libs/sdk'
+import { currencyEquals, Trade, TradeType } from '@pancakeswap-libs/sdk'
 import React, { useCallback, useMemo } from 'react'
 import TransactionConfirmationModal, {
   ConfirmationModalContent,
@@ -81,9 +81,11 @@ export default function ConfirmSwapModal({
   }, [allowedSlippage, onConfirm, showAcceptChanges, swapErrorMessage, trade])
 
   // text to show while loading
-  const pendingText = `Swapping ${trade?.inputAmount?.toSignificant(6)} ${
+  const pendingInput = trade?.tradeType === TradeType.EXACT_INPUT ? trade?.inputAmount?.toSignificant(6) : tradeWithTax?.inputAmount?.toSignificant(6)
+  const pendingOutput = trade?.tradeType === TradeType.EXACT_OUTPUT ? trade?.outputAmount?.toSignificant(6) : tradeWithTax?.outputAmount?.toSignificant(6)
+  const pendingText = `Swapping ${pendingInput} ${
     trade?.inputAmount?.currency?.symbol
-  } for ${trade?.outputAmount?.toSignificant(6)} ${trade?.outputAmount?.currency?.symbol}`
+  } for ${pendingOutput} ${trade?.outputAmount?.currency?.symbol}`
 
   const confirmationContent = useCallback(
     () =>

@@ -117,7 +117,7 @@ export default function SwapModalHeader({
           <PriceInfoText>
             {`Output is estimated. You will receive at least `}
             <span>
-              {tradeWithTax?.outputAmount.toSignificant(6)} {tradeWithTax?.outputAmount.currency.symbol}
+              {tradeWithTax?.outputAmount.toSignificant(6)} {trade?.outputAmount.currency.symbol}
             </span>
             {' or the transaction will revert.'}
           </PriceInfoText>
@@ -125,7 +125,7 @@ export default function SwapModalHeader({
           <PriceInfoText>
             {`Input is estimated. You will sell at most `}
             <span>
-              {tradeWithTax?.inputAmount.toSignificant(6)} {tradeWithTax?.inputAmount.currency.symbol}
+              {trade?.inputAmount.toSignificant(6)} {trade?.inputAmount.currency.symbol}
             </span>
             {' or the transaction will revert.'}
           </PriceInfoText>
