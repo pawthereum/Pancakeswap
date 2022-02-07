@@ -283,7 +283,7 @@ export function useDerivedSwapInfo(): {
   const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
 
   // do the same thing but account for tax -- get rid of above when we can
-  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) : 0
+  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) : 0 // TODO: this is off by 2% - maybe its LP tax that needs to be added
   const typedValueAfterTax = !typedValue ? '0' : (parseFloat(typedValue) * ((100 - totalTaxNumber) / 100)).toFixed(9).toString()
 
   const parsedAmountPostTax = tryParseAmount(typedValueAfterTax, (isExactIn ? inputCurrency : outputCurrency) ?? undefined, totalTax)
