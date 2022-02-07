@@ -206,11 +206,12 @@ export function tryParseAmount(value?: string, currency?: Currency, totalTax?: s
     return undefined
   }
   try {
-    console.log('~~~~~~~~~~TOTAL TAX: ', totalTax, '~~~~~~~~~')
-    const totalTaxParsed = !totalTax ? 0 : parseFloat(totalTax) / 100
-    const valueLessTaxes = (parseFloat(value) - parseFloat(value) * totalTaxParsed).toFixed(18).toString()
-    console.log('valueLessTaxes', valueLessTaxes)
-    const typedValueParsed = parseUnits(valueLessTaxes, currency.decimals).toString()
+    // console.log('~~~~~~~~~~TOTAL TAX: ', totalTax, '~~~~~~~~~')
+    // const totalTaxParsed = !totalTax ? 0 : parseFloat(totalTax) / 100
+    // const valueLessTaxes = (parseFloat(value) - parseFloat(value) * totalTaxParsed).toFixed(18).toString()
+    // console.log('valueLessTaxes', valueLessTaxes)
+    const typedValueParsed = parseUnits(value, currency.decimals).toString()
+    console.log('typed parse', typedValueParsed)
     if (typedValueParsed !== '0') {
       return currency instanceof Token
         ? new TokenAmount(currency, JSBI.BigInt(typedValueParsed))
@@ -315,9 +316,9 @@ export function useDerivedSwapInfo(): {
   }
 
   const [allowedSlippage] = useUserSlippageTolerance()
+  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) * 100 : 0
 
-  const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage)
-
+  const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage + totalTaxNumber)
   // compare input balance to max input based on version
   const [balanceIn, amountIn] = [
     currencyBalances[Field.INPUT],
