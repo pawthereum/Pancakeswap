@@ -101,50 +101,56 @@ export function useSwapActionHandlers(): {
           buyAmount: parseFloat(tax1BuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tax1SellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: tax2Name,
           buyAmount: parseFloat(tax2BuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tax2SellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: tax3Name,
           buyAmount: parseFloat(tax3BuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tax3SellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: tax4Name,
           buyAmount: parseFloat(tax4BuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tax4SellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: tokenTaxName,
           buyAmount: parseFloat(tokenTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tokenTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
-          isLiquidityTax: true,
           name: 'Liquidity Tax',
           buyAmount: parseFloat(liquidityTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(liquidityTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: true,
         },
         {
           name: 'Burn Tax',
           buyAmount: parseFloat(burnTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(burnTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: customTaxName,
@@ -152,12 +158,14 @@ export function useSwapActionHandlers(): {
           isTotal: false,
           buyAmount: '0%',
           sellAmount: '0%',
+          isLiquidityTax: false,
         }
       ]
       const totals = {
         name: 'Total Tax',
         isCustom: false,
         isTotal: true,
+        isLiquidityTax: false,
         buyAmount: taxes.reduce(function (p, t) {
           if (!t.buyAmount) return p + 0
           return p + parseFloat(t?.buyAmount?.replace('%', ''))
@@ -282,8 +290,22 @@ export function useDerivedSwapInfo(): {
 
   const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
 
+  let isBuy = true
+  const testnetBnb = '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd'
+  const isETH = inputCurrencyId === 'ETH'
+  const isBNB = inputCurrencyId === 'BNB'
+  if (inputCurrencyId !== testnetBnb && !isETH && !isBNB) {
+    isBuy = false
+  }
+  const liqTaxes = taxes ? taxes.find(t => t['isLiquidityTax']) : { buyAmount: '0%', sellAmount: '0%' }
+  const liqTaxStr = () => {
+    if (!liqTaxes) return '0%'
+    return isBuy ? liqTaxes['buyAmount'] : liqTaxes['sellAmount']
+  }
+  const liqTax = parseFloat(liqTaxStr().replace('%', ''))
+
   // do the same thing but account for tax -- get rid of above when we can
-  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) : 0 // TODO: this is off by 2% - maybe its LP tax that needs to be added
+  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) + liqTax : 0 
   const typedValueAfterTax = !typedValue ? '0' : (parseFloat(typedValue) * ((100 - totalTaxNumber) / 100)).toFixed(9).toString()
 
   const parsedAmountPostTax = tryParseAmount(typedValueAfterTax, (isExactIn ? inputCurrency : outputCurrency) ?? undefined, totalTax)

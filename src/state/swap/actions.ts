@@ -12,11 +12,25 @@ export const replaceSwapState = createAction<{
   field: Field
   typedValue: string
   totalTax: string
-  taxes: Array<{}>
+  taxes: Array<{
+    name: string,
+    buyAmount: string,
+    sellAmount: string,
+    isTotal: boolean,
+    isCustom: boolean,
+    isLiquidityTax: boolean
+  }>
   inputCurrencyId?: string
   outputCurrencyId?: string
   recipient: string | null
 }>('swap/replaceSwapState')
 export const setRecipient = createAction<{ recipient: string | null }>('swap/setRecipient')
 export const setTotalTax = createAction<{ totalTax: string }>('swap/setTotalTax')
-export const setTaxes = createAction<{ taxes: Array<{}> }>('swap/setTaxes')
+export const setTaxes = createAction<{ taxes: Array<{
+  name: string,
+  buyAmount: string,
+  sellAmount: string,
+  isTotal: boolean,
+  isCustom: boolean,
+  isLiquidityTax: boolean
+}> }>('swap/setTaxes')

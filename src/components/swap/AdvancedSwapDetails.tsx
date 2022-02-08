@@ -29,7 +29,7 @@ function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; 
   const TranslateString = useI18n()
   const testnetBnb = '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd'
   let isBuy = true
-  if (INPUT.currencyId !== testnetBnb) {
+  if (INPUT.currencyId !== testnetBnb && INPUT.currencyId !== 'ETH' && INPUT.currencyId !== 'BNB') {
     isBuy = false
   }
   const taxType = isBuy ? 'buyAmount' : 'sellAmount'
