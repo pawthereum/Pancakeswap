@@ -1,4 +1,4 @@
-import { CurrencyAmount, JSBI, Token, Trade } from '@pancakeswap-libs/sdk'
+import { CurrencyAmount, JSBI, Token, Trade, TradeType } from '@pancakeswap-libs/sdk'
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { ArrowDown } from 'react-feather'
 import { CardBody, ArrowDownIcon, Button, IconButton, Text } from '@pancakeswap-libs/uikit'
@@ -124,11 +124,20 @@ const Swap = () => {
     txHash: undefined,
   })
 
-  const formattedAmounts = {
+  const formattedAmounts2 = {
     [independentField]: typedValue,
     [dependentField]: showWrap
       ? parsedAmounts[independentField]?.toExact() ?? ''
       : parsedAmounts[dependentField]?.toSignificant(6) ?? '',
+  }
+
+  const formattedAmounts = {
+    [independentField]: typedValue,
+    [dependentField]: showWrap
+      ? parsedAmounts[independentField]?.toExact() ?? ''
+      : trade?.tradeType === TradeType.EXACT_OUTPUT 
+        ? trade?.inputAmount.toSignificant(6) ?? ''
+        : parsedAmounts[dependentField]?.toSignificant(6) ?? '',
   }
 
   const route = trade?.route
