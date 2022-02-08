@@ -52,7 +52,7 @@ function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; 
           <RowFixed>
             <Text fontSize="14px">
               {isExactIn
-                ? `${slippageAdjustedAmounts[Field.OUTPUT]?.toSignificant(4)} ${tradeWithTax.outputAmount.currency.symbol}` ??
+                ? `${tradeWithTax.outputAmount?.toSignificant(4)} ${tradeWithTax.outputAmount.currency.symbol}` ??
                   '-'
                 : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade.inputAmount.currency.symbol}` ??
                   '-'}
