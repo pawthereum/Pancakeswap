@@ -58,11 +58,7 @@ export default function SwapModalHeader({
             fontSize="24px"
             color={showAcceptChanges && trade.tradeType === TradeType.EXACT_OUTPUT ? theme.colors.primary : 'text'}
           >
-            { 
-              trade.tradeType === TradeType.EXACT_OUTPUT ?
-              tradeWithTax?.inputAmount.toSignificant(6) :
-              trade.inputAmount.toSignificant(6)
-            }
+            { trade?.inputAmount.toSignificant(6) }
           </Text>
         </RowFixed>
         <RowFixed gap="0px">
