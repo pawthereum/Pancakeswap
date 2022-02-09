@@ -41,6 +41,7 @@ type EstimatedSwapCall = SuccessfulCall | FailedCall
  */
 function useSwapCallArguments(
   trade: Trade | undefined, // trade to execute, required
+  tradeWithTax: Trade | undefined, // trade with taxes accounted for
   allowedSlippage: number = INITIAL_ALLOWED_SLIPPAGE, // in bips
   deadline: number = DEFAULT_DEADLINE_FROM_NOW, // in seconds from now
   recipientAddressOrName: string | null // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender
@@ -62,7 +63,7 @@ function useSwapCallArguments(
 
     swapMethods.push(
       // @ts-ignore
-      Router.swapCallParameters(trade, {
+      Router.swapCallParameters(trade, tradeWithTax, {
         feeOnTransfer: false,
         allowedSlippage: new Percent(JSBI.BigInt(Math.floor(allowedSlippage)), BIPS_BASE),
         recipient,
@@ -73,7 +74,7 @@ function useSwapCallArguments(
     if (trade.tradeType === TradeType.EXACT_INPUT) {
       swapMethods.push(
         // @ts-ignore
-        Router.swapCallParameters(trade, {
+        Router.swapCallParameters(trade, tradeWithTax, {
           feeOnTransfer: true,
           allowedSlippage: new Percent(JSBI.BigInt(Math.floor(allowedSlippage)), BIPS_BASE),
           recipient,
@@ -90,13 +91,14 @@ function useSwapCallArguments(
 // and the user has approved the slippage adjusted input amount for the trade
 export function useSwapCallback(
   trade: Trade | undefined, // trade to execute, required
+  tradeWithTax: Trade | undefined, // trade with taxes accounted for
   allowedSlippage: number = INITIAL_ALLOWED_SLIPPAGE, // in bips
   deadline: number = DEFAULT_DEADLINE_FROM_NOW, // in seconds from now
   recipientAddressOrName: string | null // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender
 ): { state: SwapCallbackState; callback: null | (() => Promise<string>); error: string | null } {
   const { account, chainId, library } = useActiveWeb3React()
 
-  const swapCalls = useSwapCallArguments(trade, allowedSlippage, deadline, recipientAddressOrName)
+  const swapCalls = useSwapCallArguments(trade, tradeWithTax, allowedSlippage, deadline, recipientAddressOrName)
 
   const addTransaction = useTransactionAdder()
 

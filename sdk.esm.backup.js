@@ -1384,7 +1384,7 @@ var Router = /*#__PURE__*/function () {
    */
 
 
-  Router.swapCallParameters = function swapCallParameters(trade, options) {
+  Router.swapCallParameters = function swapCallParameters(trade, tradeWithTax, options) {
     var etherIn = trade.inputAmount.currency === ETHER;
     var etherOut = trade.outputAmount.currency === ETHER; // the router does not support both ether in and out
 
@@ -1392,7 +1392,8 @@ var Router = /*#__PURE__*/function () {
     !(options.ttl > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TTL') : invariant(false) : void 0;
     var to = validateAndParseAddress(options.recipient);
     var amountIn = toHex(trade.maximumAmountIn(options.allowedSlippage));
-    var amountOut = toHex(trade.minimumAmountOut(options.allowedSlippage));
+    var amountOut = toHex(tradeWithTax.minimumAmountOut(options.allowedSlippage));
+    console.log('allowed slip', options.allowedSlippage)
     console.log('amount Out', amountOut)
     var path = trade.route.path.map(function (token) {
       return token.address;

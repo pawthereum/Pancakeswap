@@ -165,6 +165,7 @@ const Swap = () => {
   // the callback to execute the swap
   const { callback: swapCallback, error: swapCallbackError } = useSwapCallback(
     trade,
+    tradeWithTax,
     allowedSlippage,
     deadline,
     recipient
