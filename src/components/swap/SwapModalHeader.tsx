@@ -40,7 +40,7 @@ export default function SwapModalHeader({
     trade,
     allowedSlippage,
   ])
-  const slippageAdjustedAmountsWithTax = useMemo(() => computeSlippageAdjustedAmounts(trade, allowedSlippage), [
+  const slippageAdjustedAmountsWithTax = useMemo(() => computeSlippageAdjustedAmounts(tradeWithTax, allowedSlippage), [
     tradeWithTax,
     allowedSlippage,
   ])
@@ -58,7 +58,7 @@ export default function SwapModalHeader({
             fontSize="24px"
             color={showAcceptChanges && trade.tradeType === TradeType.EXACT_OUTPUT ? theme.colors.primary : 'text'}
           >
-            { trade?.inputAmount.toSignificant(6) }
+            {slippageAdjustedAmounts[Field.INPUT]?.toSignificant(6)}
           </Text>
         </RowFixed>
         <RowFixed gap="0px">
@@ -113,7 +113,7 @@ export default function SwapModalHeader({
           <PriceInfoText>
             {`Output is estimated. You will receive at least `}
             <span>
-              {tradeWithTax?.outputAmount.toSignificant(6)} {trade?.outputAmount.currency.symbol}
+              {slippageAdjustedAmountsWithTax[Field.OUTPUT]?.toSignificant(6)} {trade?.outputAmount.currency.symbol}
             </span>
             {' or the transaction will revert.'}
           </PriceInfoText>
@@ -121,7 +121,7 @@ export default function SwapModalHeader({
           <PriceInfoText>
             {`Input is estimated. You will sell at most `}
             <span>
-              {trade?.inputAmount.toSignificant(6)} {trade?.inputAmount.currency.symbol}
+              {slippageAdjustedAmounts[Field.INPUT]?.toSignificant(6)} {trade?.inputAmount.currency.symbol}
             </span>
             {' or the transaction will revert.'}
           </PriceInfoText>

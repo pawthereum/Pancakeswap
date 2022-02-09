@@ -37,7 +37,7 @@ export default function SwapModalFooter({
     allowedSlippage,
     trade,
   ])
-  const slippageAdjustedAmountsWithTax = useMemo(() => computeSlippageAdjustedAmounts(trade, allowedSlippage), [
+  const slippageAdjustedAmountsWithTax = useMemo(() => computeSlippageAdjustedAmounts(tradeWithTax, allowedSlippage), [
     allowedSlippage,
     tradeWithTax,
   ])
@@ -85,8 +85,8 @@ export default function SwapModalFooter({
           <RowFixed>
             <Text fontSize="14px">
               {trade.tradeType === TradeType.EXACT_INPUT
-                ? tradeWithTax?.outputAmount.toSignificant(4) ?? '-'
-                : tradeWithTax?.inputAmount.toSignificant(4) ?? '-'}
+                ? slippageAdjustedAmountsWithTax[Field.OUTPUT]?.toSignificant(4) ?? '-'
+                : slippageAdjustedAmountsWithTax[Field.OUTPUT]?.toSignificant(4) ?? '-'}
             </Text>
             <Text fontSize="14px" marginLeft="4px">
               {trade.tradeType === TradeType.EXACT_INPUT

@@ -23,9 +23,9 @@ const StyledRowDivider = styled.div`
 function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; tradeWithTax: Trade, allowedSlippage: number }) {
   const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdown(trade)
   const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
-  const { totalTax, taxes, INPUT, OUTPUT } = useSwapState()
-  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) * 100 : 0
-  const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage + totalTaxNumber)
+  const { taxes, INPUT } = useSwapState()
+  const slippageAdjustedAmountsWithTax = computeSlippageAdjustedAmounts(tradeWithTax, allowedSlippage)
+  const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
   const TranslateString = useI18n()
   const testnetBnb = '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd'
   let isBuy = true
@@ -52,8 +52,8 @@ function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; 
           <RowFixed>
             <Text fontSize="14px">
               {isExactIn
-                ? `${tradeWithTax.outputAmount?.toSignificant(4)} ${tradeWithTax.outputAmount.currency.symbol}` ??
-                  '-'
+                ? `${slippageAdjustedAmountsWithTax[Field.OUTPUT]?.toSignificant(4)} ${trade.outputAmount.currency.symbol}` ??
+                '-'
                 : `${slippageAdjustedAmounts[Field.INPUT]?.toSignificant(4)} ${trade.inputAmount.currency.symbol}` ??
                   '-'}
             </Text>
