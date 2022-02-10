@@ -306,12 +306,15 @@ export function useDerivedSwapInfo(): {
 
   // do the same thing but account for tax -- get rid of above when we can
   const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) + liqTax : 0 
-  const typedValueAfterTax = !typedValue ? '0' : (parseFloat(typedValue) * ((100 - totalTaxNumber) / 100)).toFixed(9).toString()
+  const typedValueAfterTax = !typedValue ? '0' : isExactIn 
+    ? (parseFloat(typedValue) * ((100 - totalTaxNumber) / 100)).toFixed(9).toString()
+    : (parseFloat(typedValue) + (parseFloat(typedValue) * (totalTaxNumber / 100))).toFixed(9).toString()
 
   const parsedAmountPostTax = tryParseAmount(typedValueAfterTax, (isExactIn ? inputCurrency : outputCurrency) ?? undefined, totalTax)
   const bestTradeTaxedExactIn = useTradeExactIn(isExactIn ? parsedAmountPostTax : undefined, outputCurrency ?? undefined)
   const bestTradeTaxedExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmountPostTax : undefined)
   const v2TradeWithTax = isExactIn ? bestTradeTaxedExactIn : bestTradeTaxedExactOut
+  // const v2Trade = isExactIn ? bestTradeExactIn : bestTradeTaxedExactOut
   // end of doing the same thing
   // const newTrade = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? remainingAfterTax : undefined)
   // console.log('total tax num', totalTaxNumber)
