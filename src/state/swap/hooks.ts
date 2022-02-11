@@ -11,7 +11,7 @@ import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress, getContract } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrencyBalances } from '../wallet/hooks'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax, setTaxes } from './actions'
+import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, customTaxInput, setTotalTax, setTaxes } from './actions'
 import { SwapState } from './reducer'
 
 import { usePawswapContract } from  '../../hooks/useContract'
@@ -28,6 +28,7 @@ export function useSwapActionHandlers(): {
   onCurrencySelection: (field: Field, currency: Currency) => void
   onSwitchTokens: () => void
   onUserInput: (field: Field, typedValue: string) => void
+  onCustomTaxInput: (typedCustomTaxValue: string) => void
   onChangeRecipient: (recipient: string | null) => void
 } {
   const pawswap = usePawswapContract(false)
@@ -193,6 +194,13 @@ export function useSwapActionHandlers(): {
     [dispatch]
   )
 
+  const onCustomTaxInput = useCallback(
+    (typedCustomTaxValue: string) => {
+      dispatch(customTaxInput({ typedCustomTaxValue }))
+    },
+    [dispatch]
+  )
+
   const onChangeRecipient = useCallback(
     (recipient: string | null) => {
       dispatch(setRecipient({ recipient }))
@@ -204,12 +212,13 @@ export function useSwapActionHandlers(): {
     onSwitchTokens,
     onCurrencySelection,
     onUserInput,
+    onCustomTaxInput,
     onChangeRecipient,
   }
 }
 
 // try to parse a user entered amount for a given token
-export function tryParseAmount(value?: string, currency?: Currency, totalTax?: string | undefined): CurrencyAmount | undefined {
+export function tryParseAmount(value?: string, currency?: Currency): CurrencyAmount | undefined {
   if (!value || !currency) {
     return undefined
   }
@@ -283,7 +292,7 @@ export function useDerivedSwapInfo(): {
   ])
 
   const isExactIn: boolean = independentField === Field.INPUT
-  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined, totalTax)
+  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
 
   const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
@@ -310,7 +319,7 @@ export function useDerivedSwapInfo(): {
     ? (parseFloat(typedValue) * ((100 - totalTaxNumber) / 100)).toFixed(9).toString()
     : (parseFloat(typedValue) + (parseFloat(typedValue) * (totalTaxNumber / 100))).toFixed(9).toString()
 
-  const parsedAmountPostTax = tryParseAmount(typedValueAfterTax, (isExactIn ? inputCurrency : outputCurrency) ?? undefined, totalTax)
+  const parsedAmountPostTax = tryParseAmount(typedValueAfterTax, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
   const bestTradeTaxedExactIn = useTradeExactIn(isExactIn ? parsedAmountPostTax : undefined, outputCurrency ?? undefined)
   const bestTradeTaxedExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmountPostTax : undefined)
   const v2TradeWithTax = isExactIn ? bestTradeTaxedExactIn : bestTradeTaxedExactOut
@@ -321,6 +330,8 @@ export function useDerivedSwapInfo(): {
   // console.log(totalTaxFraction)
   // console.log('remaining', remainingAfterTax)
   // console.log('parsed amount', parsedAmount)
+
+  // console.log('custom amount of tax entered by user', customTaxInput)
 
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
@@ -432,6 +443,7 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
     },
     typedValue: parseTokenAmountURLParameter(parsedQs.exactAmount),
     totalTax: '0',
+    customTaxInput: '',
     taxes: [],
     independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
     recipient,
@@ -456,6 +468,7 @@ export function useDefaultsFromURLSearch():
     dispatch(
       replaceSwapState({
         typedValue: parsed.typedValue,
+        customTaxInput: parsed.customTaxInput,
         field: parsed.independentField,
         inputCurrencyId: parsed[Field.INPUT].currencyId,
         outputCurrencyId: parsed[Field.OUTPUT].currencyId,

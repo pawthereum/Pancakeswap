@@ -1,13 +1,14 @@
 import { CurrencyAmount, JSBI, Token, Trade, TradeType } from '@pancakeswap-libs/sdk'
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { ArrowDown } from 'react-feather'
-import { CardBody, ArrowDownIcon, Button, IconButton, Text } from '@pancakeswap-libs/uikit'
+import { CardBody, ArrowDownIcon, Won, Button, IconButton, Text } from '@pancakeswap-libs/uikit'
 import { ThemeContext } from 'styled-components'
 import AddressInputPanel from 'components/AddressInputPanel'
 import Card, { GreyCard } from 'components/Card'
 import { AutoColumn } from 'components/Column'
 import ConfirmSwapModal from 'components/swap/ConfirmSwapModal'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
+import CustomTaxInputPanel from 'components/CustomTaxInputPanel'
 import CardNav from 'components/CardNav'
 import { AutoRow, RowBetween } from 'components/Row'
 import AdvancedSwapDetailsDropdown from 'components/swap/AdvancedSwapDetailsDropdown'
@@ -71,7 +72,7 @@ const Swap = () => {
   const [allowedSlippage] = useUserSlippageTolerance()
 
   // swap state
-  const { independentField, typedValue, recipient } = useSwapState()
+  const { independentField, typedValue, customTaxInput, recipient, taxes } = useSwapState()
   const { v2Trade, v2TradeWithTax, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
   const { wrapType, execute: onWrap, inputError: wrapInputError } = useWrapCallback(
     currencies[Field.INPUT],
@@ -92,7 +93,7 @@ const Swap = () => {
         [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : tradeWithTax?.outputAmount,
       }
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useSwapActionHandlers()
+  const { onSwitchTokens, onCurrencySelection, onUserInput, onCustomTaxInput, onChangeRecipient } = useSwapActionHandlers()
   const isValid = !swapInputError
   const dependentField: Field = independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT
 
@@ -158,6 +159,29 @@ const Swap = () => {
       setApprovalSubmitted(true)
     }
   }, [approval, approvalSubmitted])
+
+  const [customTax, setCustomTax] = useState<{
+    name: string
+    exists: boolean
+  }>({
+    name: 'Custom Tax',
+    exists: false
+  })
+  
+  const handleCustomTaxInput = useCallback(
+    (value: string) => {
+      onCustomTaxInput(value)
+    },
+    [onCustomTaxInput]
+  )
+
+  useEffect(() => {
+    console.log('updating taxes...')
+    const custom = taxes.find(t => t['isCustom'])
+    !custom
+      ? setCustomTax({ name: '', exists: false })
+      : setCustomTax({ name: custom['name'], exists: true })
+  }, [taxes])
 
   const maxAmountInput: CurrencyAmount | undefined = maxAmountSpend(currencyBalances[Field.INPUT])
   const atMaxAmountInput = Boolean(maxAmountInput && parsedAmounts[Field.INPUT]?.equalTo(maxAmountInput))
@@ -355,6 +379,32 @@ const Swap = () => {
                 otherCurrency={currencies[Field.INPUT]}
                 id="swap-currency-output"
               />
+              {
+                !customTax.exists ? '' :
+                <>
+                  <AutoColumn justify="space-between">
+                    <AutoRow justify={isExpertMode ? 'space-between' : 'center'} style={{ padding: '0 1rem' }}>
+                      <ArrowWrapper clickable>
+                        <IconButton variant="tertiary"
+                          style={{ borderRadius: '50%' }}
+                          scale="sm"
+                        >
+                          <Won color="primary" width="24px" />
+                        </IconButton>
+                      </ArrowWrapper>
+                    </AutoRow>
+                  </AutoColumn>
+                  <CustomTaxInputPanel
+                    value={customTaxInput}
+                    onUserInput={handleCustomTaxInput}
+                    label={customTax?.name + ' %'}
+                    currency={currencies[Field.OUTPUT]}
+                    onCurrencySelect={handleOutputSelect}
+                    otherCurrency={currencies[Field.INPUT]}
+                    id="swap-currency-output"
+                  />
+                </>
+              }
 
               {recipient !== null && !showWrap ? (
                 <>

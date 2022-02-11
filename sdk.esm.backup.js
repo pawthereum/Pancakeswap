@@ -1391,8 +1391,8 @@ var Router = /*#__PURE__*/function () {
     !!(etherIn && etherOut) ? process.env.NODE_ENV !== "production" ? invariant(false, 'ETHER_IN_OUT') : invariant(false) : void 0;
     !(options.ttl > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TTL') : invariant(false) : void 0;
     var to = validateAndParseAddress(options.recipient);
-    var amountIn = toHex(trade.maximumAmountIn(options.allowedSlippage));
-    var amountOut = toHex(tradeWithTax.minimumAmountOut(options.allowedSlippage));
+    var amountIn = trade.tradeType === TradeType.EXACT_INPUT ? toHex(trade.maximumAmountIn(options.allowedSlippage)) : toHex(tradeWithTax.maximumAmountIn(options.allowedSlippage));
+    var amountOut = trade.tradeType === TradeType.EXACT_OUTPUT ? toHex(trade.minimumAmountOut(options.allowedSlippage)) :  toHex(tradeWithTax.minimumAmountOut(options.allowedSlippage));
     console.log('allowed slip', options.allowedSlippage)
     console.log('amount Out', amountOut)
     var path = trade.route.path.map(function (token) {
