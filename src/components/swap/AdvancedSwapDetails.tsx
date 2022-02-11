@@ -23,7 +23,7 @@ const StyledRowDivider = styled.div`
 function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; tradeWithTax: Trade, allowedSlippage: number }) {
   const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdown(trade)
   const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
-  const { taxes, INPUT } = useSwapState()
+  const { taxes, INPUT, customTaxInput } = useSwapState()
   const slippageAdjustedAmountsWithTax = computeSlippageAdjustedAmounts(tradeWithTax, allowedSlippage)
   const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
   const TranslateString = useI18n()
@@ -33,6 +33,21 @@ function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; 
     isBuy = false
   }
   const taxType = isBuy ? 'buyAmount' : 'sellAmount'
+
+  const customTaxData = taxes ? taxes.find(t => t['isCustom']) : null
+
+  const customTax = {
+    name: customTaxData ? customTaxData['name'] : 'Custom Tax',
+    buyAmount: customTaxInput + '%',
+    sellAmount: customTaxInput + '%',
+    isLiquidityTax: false,
+    isCustom: true,
+    isTotal: false
+  }
+
+  const taxesWithCustom = taxes.concat([customTax]).sort((a, b) => {
+    return a['isTotal'] === b['isTotal'] ? 1 : a['isTotal'] ? -1 : 1
+  })
 
   return (
     <Card>
@@ -87,7 +102,7 @@ function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; 
           </Text>
         </RowBetween>
         <StyledRowDivider></StyledRowDivider>
-        { !taxes ? '' : taxes.filter(t => t[taxType] !== '0%').map((t, i) => {
+        { !taxesWithCustom ? '' : taxesWithCustom.filter(t => t[taxType] !== '0%' && t[taxType] !== '%').map((t, i) => {
             return (
               <RowBetween key={i}>
                 <RowFixed>
