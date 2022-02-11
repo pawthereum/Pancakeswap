@@ -59,6 +59,23 @@ export function useSwapActionHandlers(): {
     [dispatch]
   )
 
+  const totalTaxes = (taxes) => {
+    return {
+      name: 'Total Tax',
+      isCustom: false,
+      isTotal: true,
+      isLiquidityTax: false,
+      buyAmount: taxes.reduce(function (p, t) {
+        if (!t.buyAmount) return p + 0
+        return p + parseFloat(t?.buyAmount?.replace('%', ''))
+      }, 0) + '%',
+      sellAmount: taxes.reduce(function (p, t) {
+        if (!t.sellAmount) return p + 0
+        return p + parseFloat(t?.sellAmount?.replace('%', ''))
+      }, 0) + '%',
+    }
+  }
+
   async function getTaxes(currencyId: string) {
     const taxStructureAddress = await pawswap?.tokenTaxContracts(currencyId)
     if (!library) return null
@@ -162,20 +179,7 @@ export function useSwapActionHandlers(): {
           isLiquidityTax: false,
         }
       ]
-      const totals = {
-        name: 'Total Tax',
-        isCustom: false,
-        isTotal: true,
-        isLiquidityTax: false,
-        buyAmount: taxes.reduce(function (p, t) {
-          if (!t.buyAmount) return p + 0
-          return p + parseFloat(t?.buyAmount?.replace('%', ''))
-        }, 0) + '%',
-        sellAmount: taxes.reduce(function (p, t) {
-          if (!t.sellAmount) return p + 0
-          return p + parseFloat(t?.sellAmount?.replace('%', ''))
-        }, 0) + '%',
-      }
+      const totals = totalTaxes(taxes)
       taxes.push(totals)
       return taxes
     })
@@ -196,7 +200,27 @@ export function useSwapActionHandlers(): {
 
   const onCustomTaxInput = useCallback(
     (typedCustomTaxValue: string) => {
+      // dispatch(customTaxInput({ typedCustomTaxValue }))
+      // const customTax = taxes.find(t => t['isCustom'])
+      console.log('custom tax input', typedCustomTaxValue)
       dispatch(customTaxInput({ typedCustomTaxValue }))
+      console.log('mapping...')
+
+      // const taxesWithCustom = taxes.map(t => {
+      //   if (t['isCustom']) {
+      //     t['buyAmount'] = typedCustomTaxValue + '%'
+      //     t['sellAmount'] = typedCustomTaxValue + '%'
+      //   }
+      //   return t
+      // })
+      // const taxesWithCustomAndTotal = taxesWithCustom.map(t => {
+      //   if (t['isTotal']) {
+      //     return totalTaxes(taxesWithCustom)
+      //   }
+      //   return t
+      // })
+      // console.log('taxes with custom and total', taxesWithCustomAndTotal)
+      // dispatch(setTaxes({ taxes: taxesWithCustomAndTotal }))
     },
     [dispatch]
   )
@@ -275,6 +299,7 @@ export function useDerivedSwapInfo(): {
     independentField,
     totalTax,
     taxes,
+    customTaxInput,
     typedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
@@ -312,9 +337,12 @@ export function useDerivedSwapInfo(): {
     return isBuy ? liqTaxes['buyAmount'] : liqTaxes['sellAmount']
   }
   const liqTax = parseFloat(liqTaxStr().replace('%', ''))
+  console.log('got a custom tax of', customTaxInput)
+  const customTax = customTaxInput ? parseFloat(customTaxInput) : 0
+  
 
   // do the same thing but account for tax -- get rid of above when we can
-  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) + liqTax : 0 
+  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) + liqTax + customTax : 0 
   const typedValueAfterTax = !typedValue ? '0' : isExactIn 
     ? (parseFloat(typedValue) * ((100 - totalTaxNumber) / 100)).toFixed(9).toString()
     : (parseFloat(typedValue) + (parseFloat(typedValue) * (totalTaxNumber / 100))).toFixed(9).toString()

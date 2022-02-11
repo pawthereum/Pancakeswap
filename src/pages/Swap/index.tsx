@@ -36,6 +36,8 @@ import useI18n from 'hooks/useI18n'
 import PageHeader from 'components/PageHeader'
 import ConnectWalletButton from 'components/ConnectWalletButton'
 import AppBody from '../AppBody'
+import { useAddPopup } from '../../state/application/hooks'
+
 
 const Swap = () => {
   const loadedUrlParams = useDefaultsFromURLSearch()
@@ -72,7 +74,7 @@ const Swap = () => {
   const [allowedSlippage] = useUserSlippageTolerance()
 
   // swap state
-  const { independentField, typedValue, customTaxInput, recipient, taxes } = useSwapState()
+  const { independentField, typedValue, customTaxInput, recipient, totalTax, taxes } = useSwapState()
   const { v2Trade, v2TradeWithTax, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
   const { wrapType, execute: onWrap, inputError: wrapInputError } = useWrapCallback(
     currencies[Field.INPUT],
@@ -168,8 +170,24 @@ const Swap = () => {
     exists: false
   })
   
+  const addPopup = useAddPopup()
   const handleCustomTaxInput = useCallback(
     (value: string) => {
+      // max out your custom tax to 50%
+      const amt = parseFloat(value)
+      console.log('[~~~~~~~~~~~~~] before i send this off...', taxes)
+      if (amt > 50) {
+        addPopup(
+          {
+            message: {
+              success: false,
+              body: 'Maximum custom tax amount is 50%',
+            },
+          },
+          'https://pawthereum.com'
+        )
+        return onCustomTaxInput('50')
+      }
       onCustomTaxInput(value)
     },
     [onCustomTaxInput]
@@ -292,6 +310,7 @@ const Swap = () => {
     },
     [onCurrencySelection, checkForSyrup]
   )
+  console.log('~~~~~~~~~~TAXES', taxes)
 
   return (
     <>
