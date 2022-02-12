@@ -35,8 +35,8 @@ var Rounding;
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(Rounding || (Rounding = {}));
 
-var FACTORY_ADDRESS = '0xAd40b45e2E94D4D78D40866Dde642881542aA5eD';
-var INIT_CODE_HASH = '0xeedd9e027df9c2cce40f6eba58fc70764af4b91dfe6f32833d3f58e867976901';
+var FACTORY_ADDRESS = '0xE423b5809e9bD8d62C8595b0Bd86a6375d51eC6d';
+var INIT_CODE_HASH = '0x094d7a71a7a518201e2584e547fd19d48c7c0dd5257d3e2113388755be54b1f9';
 var MINIMUM_LIQUIDITY = /*#__PURE__*/JSBI.BigInt(1000); // exports for internal consumption
 
 var ZERO = /*#__PURE__*/JSBI.BigInt(0);
@@ -1142,6 +1142,7 @@ var Trade = /*#__PURE__*/function () {
     this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input));
     this.priceImpact = computePriceImpact(route.midPrice, this.inputAmount, this.outputAmount);
   }
+
   /**
    * Constructs an exact in trade with the given amount in and route
    * @param route route of the exact in trade
@@ -1387,14 +1388,21 @@ var Router = /*#__PURE__*/function () {
   Router.swapCallParameters = function swapCallParameters(trade, tradeWithTax, options) {
     var etherIn = trade.inputAmount.currency === ETHER;
     var etherOut = trade.outputAmount.currency === ETHER; // the router does not support both ether in and out
+    console.log('trade', trade)
+    console.log('trade with taxes', tradeWithTax)
+    console.log('options', options)
 
     !!(etherIn && etherOut) ? process.env.NODE_ENV !== "production" ? invariant(false, 'ETHER_IN_OUT') : invariant(false) : void 0;
     !(options.ttl > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TTL') : invariant(false) : void 0;
     var to = validateAndParseAddress(options.recipient);
     var amountIn = trade.tradeType === TradeType.EXACT_INPUT ? toHex(trade.maximumAmountIn(options.allowedSlippage)) : toHex(tradeWithTax.maximumAmountIn(options.allowedSlippage));
     var amountOut = trade.tradeType === TradeType.EXACT_OUTPUT ? toHex(trade.minimumAmountOut(options.allowedSlippage)) :  toHex(tradeWithTax.minimumAmountOut(options.allowedSlippage));
+    console.log('perc', new Percent(0,1))
     console.log('allowed slip', options.allowedSlippage)
-    console.log('amount Out', amountOut)
+    console.log('amount out', tradeWithTax.minimumAmountOut(options.allowedSlippage))
+    console.log('amount Out d', tradeWithTax.minimumAmountOut(options.allowedSlippage).toSignificant(9))
+    console.log('amount out hex', toHex(tradeWithTax.minimumAmountOut(options.allowedSlippage)))
+    console.log('CUSTOM TAX', options.customTaxAmount)
     var path = trade.route.path.map(function (token) {
       return token.address;
     });
@@ -1412,7 +1420,7 @@ var Router = /*#__PURE__*/function () {
           // methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'; // (uint amountOutMin, address[] calldata path, address to, uint deadline)
 
           /* TODO: change last value to amountOut and allow custom taxes! */
-          args = [path.find(address => address.toLowerCase() !== nativeToken), 0, to, 0, 0];
+          args = [path.find(address => address.toLowerCase() !== nativeToken), options.customTaxAmount, to, 0, amountOut];
           // args = [amountOut, path.find(address => address.toLowerCase() !== nativeToken), to, deadline];
           value = amountIn;
         } else if (etherOut) {
@@ -1420,14 +1428,14 @@ var Router = /*#__PURE__*/function () {
           // methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'; // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
 
           /* TODO: change last value to amountOut and allow custom taxes!*/
-          args = [path.find(address => address.toLowerCase() !== nativeToken), amountIn, 0, to, 0, 0]
+          args = [path.find(address => address.toLowerCase() !== nativeToken), amountIn, options.customTaxAmount, to, 0, amountOut]
           // args = [amountIn, amountOut, path.find(address => address.toLowerCase() !== nativeToken), to, deadline];
           value = ZERO_HEX;
         } else {
           methodName = path[0].toLowerCase() === nativeToken ? 'buyOnPawSwap' : 'sellOnPawSwap'
           // methodName = useFeeOnTransfer ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens' : 'swapExactTokensForTokens'; // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
 
-          args = methodName === 'buyOnPawSwap' ? [path.find(address => address.toLowerCase() !== nativeToken), 0, to, 0, 0] : [path.find(address => address.toLowerCase() !== nativeToken), amountIn, 0, to, 0, 0]
+          args = methodName === 'buyOnPawSwap' ? [path.find(address => address.toLowerCase() !== nativeToken), options.customTaxAmount, to, 0, amountOut] : [path.find(address => address.toLowerCase() !== nativeToken), amountIn, options.customTaxAmount, to, 0, amountOut]
           // args = [amountIn, amountOut, path.find(address => address.toLowerCase() !== nativeToken), to, deadline];
           value = methodName === 'buyOnPawSwap' ? amountIn : ZERO_HEX;
         }
@@ -1442,7 +1450,7 @@ var Router = /*#__PURE__*/function () {
           // methodName = 'swapETHForExactTokens'; // (uint amountOut, address[] calldata path, address to, uint deadline)
           
           /* TODO: change last value to amountOut and allow custom taxes! */
-          args = [path.find(address => address.toLowerCase() !== nativeToken), 0, to, 0, 0];
+          args = [path.find(address => address.toLowerCase() !== nativeToken), options.customTaxAmount, to, 0, amountOut];
           // args = [amountOut, path, to, deadline];
           value = amountIn;
         } else if (etherOut) {
@@ -1450,14 +1458,14 @@ var Router = /*#__PURE__*/function () {
           // methodName = 'swapTokensForExactETH'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
 
           /* TODO: change last value to amountOut and allow custom taxes!*/
-          args = [path.find(address => address.toLowerCase() !== nativeToken), amountIn, 0, to, 0, 0]
+          args = [path.find(address => address.toLowerCase() !== nativeToken), amountIn, options.customTaxAmount, to, 0, amountOut]
           // args = [amountOut, amountIn, path, to, deadline];
           value = ZERO_HEX;
         } else {
           methodName = path[0].toLowerCase() === nativeToken ? 'buyOnPawSwap' : 'sellOnPawSwap'
           // methodName = 'swapTokensForExactTokens'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
 
-          args = methodName === 'buyOnPawSwap' ? [path.find(address => address.toLowerCase() !== nativeToken), 0, to, 0, 0] : [path.find(address => address.toLowerCase() !== nativeToken), amountIn, 0, to, 0, 0]
+          args = methodName === 'buyOnPawSwap' ? [path.find(address => address.toLowerCase() !== nativeToken), options.customTaxAmount, to, 0, amountOut] : [path.find(address => address.toLowerCase() !== nativeToken), amountIn, options.customTaxAmount, to, 0, amountOut]
           // args = [amountOut, amountIn, path, to, deadline];
           
           value = methodName === 'buyOnPawSwap' ? amountIn : ZERO_HEX;

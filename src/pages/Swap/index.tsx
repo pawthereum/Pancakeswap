@@ -204,12 +204,14 @@ const Swap = () => {
   const maxAmountInput: CurrencyAmount | undefined = maxAmountSpend(currencyBalances[Field.INPUT])
   const atMaxAmountInput = Boolean(maxAmountInput && parsedAmounts[Field.INPUT]?.equalTo(maxAmountInput))
 
+  console.log('customTaxInput', customTaxInput)
   // the callback to execute the swap
   const { callback: swapCallback, error: swapCallbackError } = useSwapCallback(
     trade,
     tradeWithTax,
     allowedSlippage,
     deadline,
+    customTaxInput,
     recipient
   )
 
