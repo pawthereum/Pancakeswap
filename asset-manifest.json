@@ -1,12 +1,12 @@
 {
   "files": {
-    "main.js": "https://pawthereum.github.io/Pancakeswap/static/js/main.917a77bf.chunk.js",
-    "main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/main.917a77bf.chunk.js.map",
+    "main.js": "https://pawthereum.github.io/Pancakeswap/static/js/main.123aca45.chunk.js",
+    "main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/main.123aca45.chunk.js.map",
     "runtime-main.js": "https://pawthereum.github.io/Pancakeswap/static/js/runtime-main.f328c080.js",
     "runtime-main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/runtime-main.f328c080.js.map",
     "static/css/2.631bf38d.chunk.css": "https://pawthereum.github.io/Pancakeswap/static/css/2.631bf38d.chunk.css",
-    "static/js/2.8405a02b.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/2.8405a02b.chunk.js",
-    "static/js/2.8405a02b.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/2.8405a02b.chunk.js.map",
+    "static/js/2.7a611aa0.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/2.7a611aa0.chunk.js",
+    "static/js/2.7a611aa0.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/2.7a611aa0.chunk.js.map",
     "static/js/3.61671352.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/3.61671352.chunk.js",
     "static/js/3.61671352.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/3.61671352.chunk.js.map",
     "static/js/4.46994533.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/4.46994533.chunk.js",
@@ -17,14 +17,14 @@
     "static/js/6.e38c400d.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/6.e38c400d.chunk.js.map",
     "index.html": "https://pawthereum.github.io/Pancakeswap/index.html",
     "static/css/2.631bf38d.chunk.css.map": "https://pawthereum.github.io/Pancakeswap/static/css/2.631bf38d.chunk.css.map",
-    "static/js/2.8405a02b.chunk.js.LICENSE.txt": "https://pawthereum.github.io/Pancakeswap/static/js/2.8405a02b.chunk.js.LICENSE.txt",
+    "static/js/2.7a611aa0.chunk.js.LICENSE.txt": "https://pawthereum.github.io/Pancakeswap/static/js/2.7a611aa0.chunk.js.LICENSE.txt",
     "static/js/3.61671352.chunk.js.LICENSE.txt": "https://pawthereum.github.io/Pancakeswap/static/js/3.61671352.chunk.js.LICENSE.txt",
     "static/media/inter.css": "https://pawthereum.github.io/Pancakeswap/static/media/Inter.var.c2fe3cb2.woff2"
   },
   "entrypoints": [
     "static/js/runtime-main.f328c080.js",
     "static/css/2.631bf38d.chunk.css",
-    "static/js/2.8405a02b.chunk.js",
-    "static/js/main.917a77bf.chunk.js"
+    "static/js/2.7a611aa0.chunk.js",
+    "static/js/main.123aca45.chunk.js"
   ]
 }
