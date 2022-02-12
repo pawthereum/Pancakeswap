@@ -45,8 +45,29 @@ function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; 
     isTotal: false
   }
 
-  const taxesWithCustom = taxes.concat([customTax]).sort((a, b) => {
+  const taxesWithCustom = taxes.filter(t => !t['isCustom']).sort((a, b) => {
     return a['isTotal'] === b['isTotal'] ? 1 : a['isTotal'] ? -1 : 1
+  }).concat([customTax])
+
+  const taxesWithCustomAndTotal = taxesWithCustom.map(t => {
+    if (t['isTotal']) {
+      return {
+        name: 'Total Tax',
+        isCustom: false,
+        isTotal: true,
+        isLiquidityTax: false,
+        buyAmount: taxesWithCustom.reduce(function (p, t) {
+          // why +p ? https://stackoverflow.com/questions/47484525/operator-cannot-be-applied-to-types-number-and-1
+          if (!t['buyAmount'] || t['buyAmount'] === '%') return +p + 0
+          return +p + parseFloat(t['buyAmount'].replace('%', ''))
+        }, 0) + '%',
+        sellAmount: taxesWithCustom.reduce(function (p, t) {
+          if (!t['sellAmount'] || t['sellAmount'] === '%') return +p + 0
+          return +p + parseFloat(t['sellAmount'].replace('%', ''))
+        }, 0) + '%',
+      }
+    }
+    return t
   })
 
   return (
@@ -102,7 +123,7 @@ function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; 
           </Text>
         </RowBetween>
         <StyledRowDivider></StyledRowDivider>
-        { !taxesWithCustom ? '' : taxesWithCustom.filter(t => t[taxType] !== '0%' && t[taxType] !== '%').map((t, i) => {
+        { !taxesWithCustomAndTotal ? '' : taxesWithCustomAndTotal.filter(t => t[taxType] !== '0%' && t[taxType] !== '%').map((t, i) => {
             return (
               <RowBetween key={i}>
                 <RowFixed>
