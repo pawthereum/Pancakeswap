@@ -41,7 +41,7 @@ export default function SwapModalFooter({
     allowedSlippage,
     tradeWithTax,
   ])
-  const { priceImpactWithoutFee, realizedLPFee } = useMemo(() => computeTradePriceBreakdown(trade), [trade])
+  const { priceImpactWithoutFee, realizedLPFee } = useMemo(() => computeTradePriceBreakdown(tradeWithTax), [tradeWithTax])
   const severity = warningSeverity(priceImpactWithoutFee)
   const TranslateString = useI18n()
 

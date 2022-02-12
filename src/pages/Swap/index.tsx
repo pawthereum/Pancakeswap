@@ -215,7 +215,7 @@ const Swap = () => {
     recipient
   )
 
-  const { priceImpactWithoutFee } = computeTradePriceBreakdown(trade)
+  const { priceImpactWithoutFee } = computeTradePriceBreakdown(tradeWithTax)
 
   const handleSwap = useCallback(() => {
     if (priceImpactWithoutFee && !confirmPriceImpactWithoutFee(priceImpactWithoutFee)) {

@@ -21,7 +21,7 @@ const StyledRowDivider = styled.div`
 `
 
 function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; tradeWithTax: Trade, allowedSlippage: number }) {
-  const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdown(trade)
+  const { priceImpactWithoutFee, realizedLPFee } = computeTradePriceBreakdown(tradeWithTax)
   const isExactIn = trade.tradeType === TradeType.EXACT_INPUT
   const { taxes, INPUT, customTaxInput } = useSwapState()
   const slippageAdjustedAmountsWithTax = computeSlippageAdjustedAmounts(tradeWithTax, allowedSlippage)
