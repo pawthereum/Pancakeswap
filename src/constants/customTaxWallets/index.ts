@@ -10,5 +10,11 @@ export const customTaxWallets = [
     symbol: 'MYK',
     address: '0xf4a22c530e8cc64770c4edb5766d26f8926e20bd',
     logo: 'https://etherscan.io/images/logo-ether.png?v=0.0.2'
+  },
+  {
+    name: 'Binance Charity',
+    symbol: 'BSC',
+    address: '0xf4a22c530e8cc64770c4edb5766d26f8926e20bd',
+    logo: 'https://testnet.bscscan.com/images/logo-bscscan.svg?v=0.0.3'
   }
 ]

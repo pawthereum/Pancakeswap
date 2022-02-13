@@ -12,6 +12,7 @@ import { RowBetween } from '../Row'
 import { Input as NumericalInput } from '../NumericalInput'
 import { useActiveWeb3React } from '../../hooks'
 import Tooltip from '../Tooltip'
+import ListLogo from 'components/ListLogo'
 
 const InputRow = styled.div<{ selected: boolean }>`
   display: flex;
@@ -138,6 +139,15 @@ export default function CustomTaxInputPanel({
   const [show, setShow] = useState<boolean>(false)
   const open = useCallback(() => setShow(true), [setShow])
   const close = useCallback(() => setShow(false), [setShow])
+
+  const [wallet, setWallet] = useState<Wallet>()
+  const handleWalletSelect = (wallet: Wallet) => {
+    onWalletSelect(wallet)
+    setWallet(wallet)
+  }
+
+  const walletLogo = wallet ? wallet.logo : null
+
   return (
     <InputPanel id={id}>
       <Container hideInput={hideInput}>
@@ -182,25 +192,18 @@ export default function CustomTaxInputPanel({
             }}
           >
             <Aligner>
-              {pair ? (
-                <DoubleCurrencyLogo currency0={pair.token0} currency1={pair.token1} size={16} margin />
-              ) : currency ? (
-                <CurrencyLogo currency={currency} size="24px" style={{ marginRight: '8px' }} />
-              ) : null}
-              {pair ? (
+              {
+                walletLogo
+                  ?
+                    <ListLogo logoURI={walletLogo} size="24px" style={{ marginRight: '8px' }}/>
+                  :
+                    <CurrencyLogo currency={undefined} size="24px" style={{ marginRight: '8px' }} />
+              }
                 <Text>
-                  {pair?.token0.symbol}:{pair?.token1.symbol}
+                  {
+                    wallet ? wallet.symbol : TranslateString(1196, 'Select a wallet')
+                  }
                 </Text>
-              ) : (
-                <Text>
-                  {(currency && currency.symbol && currency.symbol.length > 20
-                    ? `${currency.symbol.slice(0, 4)}...${currency.symbol.slice(
-                        currency.symbol.length - 5,
-                        currency.symbol.length
-                      )}`
-                    : currency?.symbol) || TranslateString(1196, 'Select a currency')}
-                </Text>
-              )}
               {!disableCurrencySelect && <ChevronDownIcon />}
             </Aligner>
           </CurrencySelect>
@@ -211,7 +214,7 @@ export default function CustomTaxInputPanel({
           isOpen={modalOpen}
           onDismiss={handleDismissSearch}
           onCurrencySelect={onCurrencySelect}
-          onWalletSelect={onWalletSelect}
+          onWalletSelect={handleWalletSelect}
           selectedCurrency={currency}
           otherSelectedCurrency={otherCurrency}
           showCommonBases={showCommonBases}
