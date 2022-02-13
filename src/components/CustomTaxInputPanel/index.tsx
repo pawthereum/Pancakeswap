@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { darken } from 'polished'
 import useI18n from 'hooks/useI18n'
 import { useCurrencyBalance } from '../../state/wallet/hooks'
-import CurrencySearchModal from '../SearchModal/CurrencySearchModal'
+import CustomTaxSearchModal from '../SearchModal/CustomTaxSearchModal'
 import CurrencyLogo from '../CurrencyLogo'
 import DoubleCurrencyLogo from '../DoubleLogo'
 import { RowBetween } from '../Row'
@@ -86,12 +86,21 @@ const TagWrapper = styled.div`
     opacity: 0.7;
   }
 `
+
+interface Wallet {
+  address: string,
+  symbol: string,
+  name: string,
+  logo: string
+}
+
 interface CustomTaxInputPanelProps {
   value: string
   onUserInput: (value: string) => void
   onMax?: () => void
   label?: string
   onCurrencySelect?: (currency: Currency) => void
+  onWalletSelect: (wallet: Wallet) => void
   currency?: Currency | null
   disableCurrencySelect?: boolean
   hideBalance?: boolean
@@ -107,6 +116,7 @@ export default function CustomTaxInputPanel({
   onMax,
   label,
   onCurrencySelect,
+  onWalletSelect,
   currency,
   disableCurrencySelect = false,
   hideBalance = false,
@@ -197,10 +207,11 @@ export default function CustomTaxInputPanel({
         </InputRow>
       </Container>
       {!disableCurrencySelect && onCurrencySelect && (
-        <CurrencySearchModal
+        <CustomTaxSearchModal
           isOpen={modalOpen}
           onDismiss={handleDismissSearch}
           onCurrencySelect={onCurrencySelect}
+          onWalletSelect={onWalletSelect}
           selectedCurrency={currency}
           otherSelectedCurrency={otherCurrency}
           showCommonBases={showCommonBases}

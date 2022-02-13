@@ -45,6 +45,7 @@ function useSwapCallArguments(
   allowedSlippage: number = INITIAL_ALLOWED_SLIPPAGE, // in bips
   deadline: number = DEFAULT_DEADLINE_FROM_NOW, // in seconds from now
   customTaxAmount: string | null,
+  customTaxWallet: string | null,
   recipientAddressOrName: string | null // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender
 ): SwapCall[] {
   const { account, chainId, library } = useActiveWeb3React()
@@ -70,6 +71,7 @@ function useSwapCallArguments(
         recipient,
         ttl: deadline,
         customTaxAmount: !customTaxAmount ? 0 : parseFloat(customTaxAmount) * 100,
+        customTaxWallet: !customTaxWallet || customTaxWallet === '' ? account : customTaxWallet,
       })
     )
 
@@ -82,6 +84,7 @@ function useSwapCallArguments(
           recipient,
           ttl: deadline,
           customTaxAmount: !customTaxAmount ? 0 : parseFloat(customTaxAmount) * 100,
+          customTaxWallet: !customTaxWallet || customTaxWallet === '' ? account : customTaxWallet
         })
       )
     }
@@ -98,11 +101,12 @@ export function useSwapCallback(
   allowedSlippage: number = INITIAL_ALLOWED_SLIPPAGE, // in bips
   deadline: number = DEFAULT_DEADLINE_FROM_NOW, // in seconds from now
   customTaxAmount: string | null,
+  customTaxWallet: string | null,
   recipientAddressOrName: string | null // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender
 ): { state: SwapCallbackState; callback: null | (() => Promise<string>); error: string | null } {
   const { account, chainId, library } = useActiveWeb3React()
 
-  const swapCalls = useSwapCallArguments(trade, tradeWithTax, allowedSlippage, deadline, customTaxAmount, recipientAddressOrName)
+  const swapCalls = useSwapCallArguments(trade, tradeWithTax, allowedSlippage, deadline, customTaxAmount, customTaxWallet, recipientAddressOrName)
 
   const addTransaction = useTransactionAdder()
 

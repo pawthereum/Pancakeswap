@@ -74,7 +74,7 @@ const Swap = () => {
   const [allowedSlippage] = useUserSlippageTolerance()
 
   // swap state
-  const { independentField, typedValue, customTaxInput, recipient, totalTax, taxes } = useSwapState()
+  const { independentField, typedValue, customTaxInput, customTaxWallet, recipient, totalTax, taxes } = useSwapState()
   const { v2Trade, v2TradeWithTax, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
   const { wrapType, execute: onWrap, inputError: wrapInputError } = useWrapCallback(
     currencies[Field.INPUT],
@@ -95,7 +95,7 @@ const Swap = () => {
         [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : tradeWithTax?.outputAmount,
       }
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput, onCustomTaxInput, onChangeRecipient } = useSwapActionHandlers()
+  const { onSwitchTokens, onCurrencySelection, onCustomTaxWalletSelection, onUserInput, onCustomTaxInput, onChangeRecipient } = useSwapActionHandlers()
   const isValid = !swapInputError
   const dependentField: Field = independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT
 
@@ -212,6 +212,7 @@ const Swap = () => {
     allowedSlippage,
     deadline,
     customTaxInput,
+    customTaxWallet,
     recipient
   )
 
@@ -312,7 +313,14 @@ const Swap = () => {
     },
     [onCurrencySelection, checkForSyrup]
   )
-  console.log('~~~~~~~~~~TAXES', taxes)
+
+  const handleCustomTaxSelect = useCallback(
+    (customTaxWallet) => {
+      console.log('they decided to go to', customTaxWallet)
+      onCustomTaxWalletSelection(customTaxWallet.address)
+    },
+    [onCustomTaxWalletSelection]
+  )
 
   return (
     <>
@@ -420,7 +428,8 @@ const Swap = () => {
                     onUserInput={handleCustomTaxInput}
                     label={customTax?.name + ' %'}
                     currency={currencies[Field.OUTPUT]}
-                    onCurrencySelect={handleOutputSelect}
+                    onCurrencySelect={handleCustomTaxSelect}
+                    onWalletSelect={handleCustomTaxSelect}
                     otherCurrency={currencies[Field.INPUT]}
                     id="swap-currency-output"
                   />

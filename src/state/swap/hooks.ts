@@ -11,7 +11,7 @@ import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress, getContract } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrencyBalances } from '../wallet/hooks'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, customTaxInput, setTotalTax, setTaxes } from './actions'
+import { Field, replaceSwapState, selectCurrency, selectCustomTaxWallet, setRecipient, switchCurrencies, typeInput, customTaxInput, setTotalTax, setTaxes } from './actions'
 import { SwapState } from './reducer'
 
 import { usePawswapContract } from  '../../hooks/useContract'
@@ -26,6 +26,7 @@ export function useSwapState(): AppState['swap'] {
 
 export function useSwapActionHandlers(): {
   onCurrencySelection: (field: Field, currency: Currency) => void
+  onCustomTaxWalletSelection: (wallet: string) => void
   onSwitchTokens: () => void
   onUserInput: (field: Field, typedValue: string) => void
   onCustomTaxInput: (typedCustomTaxValue: string) => void
@@ -55,6 +56,13 @@ export function useSwapActionHandlers(): {
       // dispatch(setTaxes({ taxes: field === 'INPUT' ? taxes.filter(t => {
       //   t.
       // })}))
+    },
+    [dispatch]
+  )
+
+  const onCustomTaxWalletSelection = useCallback(
+    async (address: string) => {
+      dispatch(selectCustomTaxWallet({ customTaxWallet: address }))
     },
     [dispatch]
   )
@@ -238,6 +246,7 @@ export function useSwapActionHandlers(): {
     onUserInput,
     onCustomTaxInput,
     onChangeRecipient,
+    onCustomTaxWalletSelection,
   }
 }
 
@@ -472,6 +481,7 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
     typedValue: parseTokenAmountURLParameter(parsedQs.exactAmount),
     totalTax: '0',
     customTaxInput: '',
+    customTaxWallet: '',
     taxes: [],
     independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
     recipient,
@@ -497,6 +507,7 @@ export function useDefaultsFromURLSearch():
       replaceSwapState({
         typedValue: parsed.typedValue,
         customTaxInput: parsed.customTaxInput,
+        customTaxWallet: parsed.customTaxWallet,
         field: parsed.independentField,
         inputCurrencyId: parsed[Field.INPUT].currencyId,
         outputCurrencyId: parsed[Field.OUTPUT].currencyId,
