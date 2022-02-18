@@ -49,22 +49,21 @@ function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; 
     return a['isTotal'] === b['isTotal'] ? 1 : a['isTotal'] ? -1 : 1
   }).concat([customTax])
 
-  const taxesWithCustomAndTotal = taxesWithCustom.map(t => {
+  const taxesWithCustomAndTotal = taxesWithCustom.map((t, i) => {
     if (t['isTotal']) {
+      const parseTax = (tax) => {
+        return parseFloat(tax.replace('%', ''))
+      }
+      const buyAmount = customTaxInput ? parseTax(t['buyAmount']) + parseFloat(customTaxInput) : parseTax(t['buyAmount'])
+      const sellAmount = customTaxInput ? parseTax(t['sellAmount']) + parseFloat(customTaxInput) : parseTax(t['sellAmount'])
+      
       return {
         name: 'Total Tax',
         isCustom: false,
         isTotal: true,
         isLiquidityTax: false,
-        buyAmount: taxesWithCustom.reduce(function (p, t) {
-          // why +p ? https://stackoverflow.com/questions/47484525/operator-cannot-be-applied-to-types-number-and-1
-          if (!t['buyAmount'] || t['buyAmount'] === '%') return +p + 0
-          return +p + parseFloat(t['buyAmount'].replace('%', ''))
-        }, 0) + '%',
-        sellAmount: taxesWithCustom.reduce(function (p, t) {
-          if (!t['sellAmount'] || t['sellAmount'] === '%') return +p + 0
-          return +p + parseFloat(t['sellAmount'].replace('%', ''))
-        }, 0) + '%',
+        buyAmount: buyAmount + '%',
+        sellAmount: sellAmount + '%',
       }
     }
     return t

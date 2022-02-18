@@ -1,6 +1,6 @@
 import { CurrencyAmount, JSBI, Token, Trade, TradeType } from '@pancakeswap-libs/sdk'
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { ArrowDown } from 'react-feather'
+import { ArrowDown, MoreHorizontal } from 'react-feather'
 import { CardBody, ArrowDownIcon, Won, Button, IconButton, Text } from '@pancakeswap-libs/uikit'
 import { ThemeContext } from 'styled-components'
 import AddressInputPanel from 'components/AddressInputPanel'
@@ -418,7 +418,7 @@ const Swap = () => {
                           style={{ borderRadius: '50%' }}
                           scale="sm"
                         >
-                          <Won color="primary" width="24px" />
+                          <MoreHorizontal />
                         </IconButton>
                       </ArrowWrapper>
                     </AutoRow>
