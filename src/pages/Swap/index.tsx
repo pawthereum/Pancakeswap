@@ -1,13 +1,14 @@
-import { CurrencyAmount, JSBI, Token, Trade } from '@pancakeswap-libs/sdk'
+import { CurrencyAmount, JSBI, Token, Trade, TradeType } from '@pancakeswap-libs/sdk'
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { ArrowDown } from 'react-feather'
-import { CardBody, ArrowDownIcon, Button, IconButton, Text } from '@pancakeswap-libs/uikit'
+import { ArrowDown, MoreHorizontal } from 'react-feather'
+import { CardBody, ArrowDownIcon, Won, Button, IconButton, Text } from '@pancakeswap-libs/uikit'
 import { ThemeContext } from 'styled-components'
 import AddressInputPanel from 'components/AddressInputPanel'
 import Card, { GreyCard } from 'components/Card'
 import { AutoColumn } from 'components/Column'
 import ConfirmSwapModal from 'components/swap/ConfirmSwapModal'
 import CurrencyInputPanel from 'components/CurrencyInputPanel'
+import CustomTaxInputPanel from 'components/CustomTaxInputPanel'
 import CardNav from 'components/CardNav'
 import { AutoRow, RowBetween } from 'components/Row'
 import AdvancedSwapDetailsDropdown from 'components/swap/AdvancedSwapDetailsDropdown'
@@ -35,6 +36,8 @@ import useI18n from 'hooks/useI18n'
 import PageHeader from 'components/PageHeader'
 import ConnectWalletButton from 'components/ConnectWalletButton'
 import AppBody from '../AppBody'
+import { useAddPopup } from '../../state/application/hooks'
+
 
 const Swap = () => {
   const loadedUrlParams = useDefaultsFromURLSearch()
@@ -71,8 +74,8 @@ const Swap = () => {
   const [allowedSlippage] = useUserSlippageTolerance()
 
   // swap state
-  const { independentField, typedValue, recipient } = useSwapState()
-  const { v2Trade, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
+  const { independentField, typedValue, customTaxInput, customTaxWallet, recipient, totalTax, taxes } = useSwapState()
+  const { v2Trade, v2TradeWithTax, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
   const { wrapType, execute: onWrap, inputError: wrapInputError } = useWrapCallback(
     currencies[Field.INPUT],
     currencies[Field.OUTPUT],
@@ -80,6 +83,7 @@ const Swap = () => {
   )
   const showWrap: boolean = wrapType !== WrapType.NOT_APPLICABLE
   const trade = showWrap ? undefined : v2Trade
+  const tradeWithTax = showWrap ? undefined : v2TradeWithTax
 
   const parsedAmounts = showWrap
     ? {
@@ -87,11 +91,11 @@ const Swap = () => {
         [Field.OUTPUT]: parsedAmount,
       }
     : {
-        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
-        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.outputAmount,
+        [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : tradeWithTax?.inputAmount,
+        [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : tradeWithTax?.outputAmount,
       }
 
-  const { onSwitchTokens, onCurrencySelection, onUserInput, onChangeRecipient } = useSwapActionHandlers()
+  const { onSwitchTokens, onCurrencySelection, onCustomTaxWalletSelection, onUserInput, onCustomTaxInput, onChangeRecipient } = useSwapActionHandlers()
   const isValid = !swapInputError
   const dependentField: Field = independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT
 
@@ -123,11 +127,20 @@ const Swap = () => {
     txHash: undefined,
   })
 
-  const formattedAmounts = {
+  const formattedAmounts2 = {
     [independentField]: typedValue,
     [dependentField]: showWrap
       ? parsedAmounts[independentField]?.toExact() ?? ''
       : parsedAmounts[dependentField]?.toSignificant(6) ?? '',
+  }
+
+  const formattedAmounts = {
+    [independentField]: typedValue,
+    [dependentField]: showWrap
+      ? parsedAmounts[independentField]?.toExact() ?? ''
+      : trade?.tradeType === TradeType.EXACT_OUTPUT 
+        ? trade?.inputAmount.toSignificant(6) ?? ''
+        : parsedAmounts[dependentField]?.toSignificant(6) ?? '',
   }
 
   const route = trade?.route
@@ -149,18 +162,61 @@ const Swap = () => {
     }
   }, [approval, approvalSubmitted])
 
+  const [customTax, setCustomTax] = useState<{
+    name: string
+    exists: boolean
+  }>({
+    name: 'Custom Tax',
+    exists: false
+  })
+  
+  const addPopup = useAddPopup()
+  const handleCustomTaxInput = useCallback(
+    (value: string) => {
+      // max out your custom tax to 50%
+      const amt = parseFloat(value)
+      console.log('[~~~~~~~~~~~~~] before i send this off...', taxes)
+      if (amt > 50) {
+        addPopup(
+          {
+            message: {
+              success: false,
+              body: 'Maximum custom tax amount is 50%',
+            },
+          },
+          'https://pawthereum.com'
+        )
+        return onCustomTaxInput('50')
+      }
+      onCustomTaxInput(value)
+    },
+    [onCustomTaxInput]
+  )
+
+  useEffect(() => {
+    console.log('updating taxes...')
+    const custom = taxes.find(t => t['isCustom'])
+    !custom
+      ? setCustomTax({ name: '', exists: false })
+      : setCustomTax({ name: custom['name'], exists: true })
+  }, [taxes])
+
   const maxAmountInput: CurrencyAmount | undefined = maxAmountSpend(currencyBalances[Field.INPUT])
   const atMaxAmountInput = Boolean(maxAmountInput && parsedAmounts[Field.INPUT]?.equalTo(maxAmountInput))
 
+  console.log('customTaxInput', customTaxInput)
   // the callback to execute the swap
   const { callback: swapCallback, error: swapCallbackError } = useSwapCallback(
     trade,
+    tradeWithTax,
     allowedSlippage,
     deadline,
+    customTaxInput,
+    customTaxWallet,
     recipient
   )
 
-  const { priceImpactWithoutFee } = computeTradePriceBreakdown(trade)
+  const { priceImpactWithoutFee } = computeTradePriceBreakdown(tradeWithTax)
 
   const handleSwap = useCallback(() => {
     if (priceImpactWithoutFee && !confirmPriceImpactWithoutFee(priceImpactWithoutFee)) {
@@ -258,6 +314,14 @@ const Swap = () => {
     [onCurrencySelection, checkForSyrup]
   )
 
+  const handleCustomTaxSelect = useCallback(
+    (customTaxWallet) => {
+      console.log('they decided to go to', customTaxWallet)
+      onCustomTaxWalletSelection(customTaxWallet.address)
+    },
+    [onCustomTaxWalletSelection]
+  )
+
   return (
     <>
       <TokenWarningModal
@@ -276,6 +340,7 @@ const Swap = () => {
           <ConfirmSwapModal
             isOpen={showConfirm}
             trade={trade}
+            tradeWithTax={tradeWithTax}
             originalTrade={tradeToConfirm}
             onAcceptChanges={handleAcceptChanges}
             attemptingTxn={attemptingTxn}
@@ -343,6 +408,33 @@ const Swap = () => {
                 otherCurrency={currencies[Field.INPUT]}
                 id="swap-currency-output"
               />
+              {
+                !customTax.exists ? '' :
+                <>
+                  <AutoColumn justify="space-between">
+                    <AutoRow justify={isExpertMode ? 'space-between' : 'center'} style={{ padding: '0 1rem' }}>
+                      <ArrowWrapper clickable>
+                        <IconButton variant="tertiary"
+                          style={{ borderRadius: '50%' }}
+                          scale="sm"
+                        >
+                          <MoreHorizontal />
+                        </IconButton>
+                      </ArrowWrapper>
+                    </AutoRow>
+                  </AutoColumn>
+                  <CustomTaxInputPanel
+                    value={customTaxInput}
+                    onUserInput={handleCustomTaxInput}
+                    label={customTax?.name + ' %'}
+                    currency={currencies[Field.OUTPUT]}
+                    onCurrencySelect={handleCustomTaxSelect}
+                    onWalletSelect={handleCustomTaxSelect}
+                    otherCurrency={currencies[Field.INPUT]}
+                    id="swap-currency-output"
+                  />
+                </>
+              }
 
               {recipient !== null && !showWrap ? (
                 <>
@@ -469,7 +561,7 @@ const Swap = () => {
           </CardBody>
         </Wrapper>
       </AppBody>
-      <AdvancedSwapDetailsDropdown trade={trade} />
+      <AdvancedSwapDetailsDropdown trade={trade} tradeWithTax={tradeWithTax} />
     </>
   )
 }

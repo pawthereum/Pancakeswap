@@ -21,10 +21,10 @@
     {
       "name": "Pawthereum",
       "symbol": "PAWTH",
-      "address": "0x33ec6D5bdb757109C6929eB9c0B21c23f6a694a8",
+      "address": "0x5abd80b8108f90c8525a183547d6ecc004112c22",
       "chainId": 97,
       "decimals": 9,
-      "logoURI": "https://pawthereum.com/shared-files/2015/?logo-notext-trsp-1.png"
+      "logoURI": "https://pawthereum.com/wp-content/uploads/shared-files/pawth-logo-transparent.png"
     }
   ]
 }

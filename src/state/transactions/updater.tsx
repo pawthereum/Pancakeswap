@@ -72,7 +72,7 @@ export default function Updater(): null {
                   txn: {
                     hash,
                     success: receipt.status === 1,
-                    summary: transactions[hash]?.summary,
+                    summary: receipt.status === 1 ? 'Swap successful!' : 'Tx Error!'// transactions[hash]?.summary,
                   },
                 },
                 hash

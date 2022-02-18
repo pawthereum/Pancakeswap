@@ -2,7 +2,7 @@ import { MenuEntry } from '@pancakeswap-libs/uikit'
 
 const config: MenuEntry[] = [
   {
-    label: 'Pancake Home',
+    label: 'Pawswap Home',
     icon: 'HomeIcon',
     href: 'https://pawthereum.github.io/Pancakeswap',
   },
@@ -22,10 +22,32 @@ const config: MenuEntry[] = [
     ],
   },
   {
-    label: 'Swap Simualation Home',
-    icon: 'InfoIcon',
-    href: 'https://bsc.kiemtienonline360.com',
-  }
+    label: 'More',
+    icon: 'MoreIcon',
+    items: [
+      {
+        label: 'Voting',
+        href: 'https://voting.pancakeswap.finance',
+      },
+      {
+        label: 'Github',
+        href: 'https://github.com/pancakeswap',
+      },
+      {
+        label: 'Docs',
+        href: 'https://docs.pancakeswap.finance',
+      },
+      {
+        label: 'Blog',
+        href: 'https://pancakeswap.medium.com',
+      },
+    ],
+  },
+  // {
+  //   label: 'Swap Simualation Home',
+  //   icon: 'InfoIcon',
+  //   href: 'https://bsc.kiemtienonline360.com',
+  // },
   // {
   //   label: 'Farms',
   //   icon: 'FarmIcon',
@@ -91,28 +113,6 @@ const config: MenuEntry[] = [
   //   label: 'IFO',
   //   icon: 'IfoIcon',
   //   href: 'https://pancakeswap.finance/ifo',
-  // },
-  // {
-  //   label: 'More',
-  //   icon: 'MoreIcon',
-  //   items: [
-  //     {
-  //       label: 'Voting',
-  //       href: 'https://voting.pancakeswap.finance',
-  //     },
-  //     {
-  //       label: 'Github',
-  //       href: 'https://github.com/pancakeswap',
-  //     },
-  //     {
-  //       label: 'Docs',
-  //       href: 'https://docs.pancakeswap.finance',
-  //     },
-  //     {
-  //       label: 'Blog',
-  //       href: 'https://pancakeswap.medium.com',
-  //     },
-  //   ],
   // },
 ]
 

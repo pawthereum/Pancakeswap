@@ -6,17 +6,35 @@ export enum Field {
 }
 
 export const selectCurrency = createAction<{ field: Field; currencyId: string }>('swap/selectCurrency')
+export const selectCustomTaxWallet = createAction<{ customTaxWallet: string }>('swap/selectCustomTaxWallet')
 export const switchCurrencies = createAction<void>('swap/switchCurrencies')
 export const typeInput = createAction<{ field: Field; typedValue: string }>('swap/typeInput')
+export const customTaxInput = createAction<{ typedCustomTaxValue: string }>('swap/customTaxInput')
 export const replaceSwapState = createAction<{
   field: Field
   typedValue: string
+  customTaxInput: string
+  customTaxWallet: string
   totalTax: string
-  taxes: Array<{}>
+  taxes: Array<{
+    name: string,
+    buyAmount: string,
+    sellAmount: string,
+    isTotal: boolean,
+    isCustom: boolean,
+    isLiquidityTax: boolean
+  }>
   inputCurrencyId?: string
   outputCurrencyId?: string
   recipient: string | null
 }>('swap/replaceSwapState')
 export const setRecipient = createAction<{ recipient: string | null }>('swap/setRecipient')
 export const setTotalTax = createAction<{ totalTax: string }>('swap/setTotalTax')
-export const setTaxes = createAction<{ taxes: Array<{}> }>('swap/setTaxes')
+export const setTaxes = createAction<{ taxes: Array<{
+  name: string,
+  buyAmount: string,
+  sellAmount: string,
+  isTotal: boolean,
+  isCustom: boolean,
+  isLiquidityTax: boolean
+}> }>('swap/setTaxes')

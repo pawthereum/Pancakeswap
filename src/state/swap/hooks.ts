@@ -1,5 +1,5 @@
 import { parseUnits } from '@ethersproject/units'
-import { Currency, CurrencyAmount, ETHER, JSBI, Token, TokenAmount, Trade } from '@pancakeswap-libs/sdk'
+import { Currency, CurrencyAmount, ETHER, Fraction, JSBI, Token, TokenAmount, Trade } from '@pancakeswap-libs/sdk'
 import { ParsedQs } from 'qs'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,7 +11,7 @@ import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress, getContract } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrencyBalances } from '../wallet/hooks'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax, setTaxes } from './actions'
+import { Field, replaceSwapState, selectCurrency, selectCustomTaxWallet, setRecipient, switchCurrencies, typeInput, customTaxInput, setTotalTax, setTaxes } from './actions'
 import { SwapState } from './reducer'
 
 import { usePawswapContract } from  '../../hooks/useContract'
@@ -26,8 +26,10 @@ export function useSwapState(): AppState['swap'] {
 
 export function useSwapActionHandlers(): {
   onCurrencySelection: (field: Field, currency: Currency) => void
+  onCustomTaxWalletSelection: (wallet: string) => void
   onSwitchTokens: () => void
   onUserInput: (field: Field, typedValue: string) => void
+  onCustomTaxInput: (typedCustomTaxValue: string) => void
   onChangeRecipient: (recipient: string | null) => void
 } {
   const pawswap = usePawswapContract(false)
@@ -57,6 +59,30 @@ export function useSwapActionHandlers(): {
     },
     [dispatch]
   )
+
+  const onCustomTaxWalletSelection = useCallback(
+    async (address: string) => {
+      dispatch(selectCustomTaxWallet({ customTaxWallet: address }))
+    },
+    [dispatch]
+  )
+
+  const totalTaxes = (taxes) => {
+    return {
+      name: 'Total Tax',
+      isCustom: false,
+      isTotal: true,
+      isLiquidityTax: false,
+      buyAmount: taxes.reduce(function (p, t) {
+        if (!t.buyAmount) return p + 0
+        return p + parseFloat(t?.buyAmount?.replace('%', ''))
+      }, 0) + '%',
+      sellAmount: taxes.reduce(function (p, t) {
+        if (!t.sellAmount) return p + 0
+        return p + parseFloat(t?.sellAmount?.replace('%', ''))
+      }, 0) + '%',
+    }
+  }
 
   async function getTaxes(currencyId: string) {
     const taxStructureAddress = await pawswap?.tokenTaxContracts(currencyId)
@@ -101,50 +127,56 @@ export function useSwapActionHandlers(): {
           buyAmount: parseFloat(tax1BuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tax1SellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: tax2Name,
           buyAmount: parseFloat(tax2BuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tax2SellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: tax3Name,
           buyAmount: parseFloat(tax3BuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tax3SellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: tax4Name,
           buyAmount: parseFloat(tax4BuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tax4SellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: tokenTaxName,
           buyAmount: parseFloat(tokenTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(tokenTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
-          isLiquidityTax: true,
           name: 'Liquidity Tax',
           buyAmount: parseFloat(liquidityTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(liquidityTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: true,
         },
         {
           name: 'Burn Tax',
           buyAmount: parseFloat(burnTaxBuyAmount) / 10**parseInt(feeDecimal) + '%',
           sellAmount: parseFloat(burnTaxSellAmount) / 10**parseInt(feeDecimal) + '%',
           isTotal: false,
-          isCustom: false
+          isCustom: false,
+          isLiquidityTax: false,
         },
         {
           name: customTaxName,
@@ -152,21 +184,10 @@ export function useSwapActionHandlers(): {
           isTotal: false,
           buyAmount: '0%',
           sellAmount: '0%',
+          isLiquidityTax: false,
         }
       ]
-      const totals = {
-        name: 'Total Tax',
-        isCustom: false,
-        isTotal: true,
-        buyAmount: taxes.reduce(function (p, t) {
-          if (!t.buyAmount) return p + 0
-          return p + parseFloat(t?.buyAmount?.replace('%', ''))
-        }, 0) + '%',
-        sellAmount: taxes.reduce(function (p, t) {
-          if (!t.sellAmount) return p + 0
-          return p + parseFloat(t?.sellAmount?.replace('%', ''))
-        }, 0) + '%',
-      }
+      const totals = totalTaxes(taxes)
       taxes.push(totals)
       return taxes
     })
@@ -185,6 +206,33 @@ export function useSwapActionHandlers(): {
     [dispatch]
   )
 
+  const onCustomTaxInput = useCallback(
+    (typedCustomTaxValue: string) => {
+      // dispatch(customTaxInput({ typedCustomTaxValue }))
+      // const customTax = taxes.find(t => t['isCustom'])
+      console.log('custom tax input', typedCustomTaxValue)
+      dispatch(customTaxInput({ typedCustomTaxValue }))
+      console.log('mapping...')
+
+      // const taxesWithCustom = taxes.map(t => {
+      //   if (t['isCustom']) {
+      //     t['buyAmount'] = typedCustomTaxValue + '%'
+      //     t['sellAmount'] = typedCustomTaxValue + '%'
+      //   }
+      //   return t
+      // })
+      // const taxesWithCustomAndTotal = taxesWithCustom.map(t => {
+      //   if (t['isTotal']) {
+      //     return totalTaxes(taxesWithCustom)
+      //   }
+      //   return t
+      // })
+      // console.log('taxes with custom and total', taxesWithCustomAndTotal)
+      // dispatch(setTaxes({ taxes: taxesWithCustomAndTotal }))
+    },
+    [dispatch]
+  )
+
   const onChangeRecipient = useCallback(
     (recipient: string | null) => {
       dispatch(setRecipient({ recipient }))
@@ -196,12 +244,14 @@ export function useSwapActionHandlers(): {
     onSwitchTokens,
     onCurrencySelection,
     onUserInput,
+    onCustomTaxInput,
     onChangeRecipient,
+    onCustomTaxWalletSelection,
   }
 }
 
 // try to parse a user entered amount for a given token
-export function tryParseAmount(value?: string, currency?: Currency, totalTax?: string | undefined): CurrencyAmount | undefined {
+export function tryParseAmount(value?: string, currency?: Currency): CurrencyAmount | undefined {
   if (!value || !currency) {
     return undefined
   }
@@ -249,6 +299,7 @@ export function useDerivedSwapInfo(): {
   currencyBalances: { [field in Field]?: CurrencyAmount }
   parsedAmount: CurrencyAmount | undefined
   v2Trade: Trade | undefined
+  v2TradeWithTax: Trade | undefined
   inputError?: string
 } {
   const { account } = useActiveWeb3React()
@@ -257,6 +308,7 @@ export function useDerivedSwapInfo(): {
     independentField,
     totalTax,
     taxes,
+    customTaxInput,
     typedValue,
     [Field.INPUT]: { currencyId: inputCurrencyId },
     [Field.OUTPUT]: { currencyId: outputCurrencyId },
@@ -274,12 +326,49 @@ export function useDerivedSwapInfo(): {
   ])
 
   const isExactIn: boolean = independentField === Field.INPUT
-  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined, totalTax)
+  const parsedAmount = tryParseAmount(typedValue, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
 
   const bestTradeExactIn = useTradeExactIn(isExactIn ? parsedAmount : undefined, outputCurrency ?? undefined)
   const bestTradeExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmount : undefined)
 
   const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
+
+  let isBuy = true
+  const testnetBnb = '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd'
+  const isETH = inputCurrencyId === 'ETH'
+  const isBNB = inputCurrencyId === 'BNB'
+  if (inputCurrencyId !== testnetBnb && !isETH && !isBNB) {
+    isBuy = false
+  }
+  const liqTaxes = taxes ? taxes.find(t => t['isLiquidityTax']) : { buyAmount: '0%', sellAmount: '0%' }
+  const liqTaxStr = () => {
+    if (!liqTaxes) return '0%'
+    return isBuy ? liqTaxes['buyAmount'] : liqTaxes['sellAmount']
+  }
+  const liqTax = parseFloat(liqTaxStr().replace('%', ''))
+  console.log('got a custom tax of', customTaxInput)
+  const customTax = customTaxInput ? parseFloat(customTaxInput) : 0
+  
+
+  // do the same thing but account for tax -- get rid of above when we can
+  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) + liqTax + customTax : 0 
+  const typedValueAfterTax = !typedValue ? '0' : isExactIn 
+    ? (parseFloat(typedValue) * ((100 - totalTaxNumber) / 100)).toFixed(9).toString()
+    : (parseFloat(typedValue) + (parseFloat(typedValue) * (totalTaxNumber / 100))).toFixed(9).toString()
+
+  const parsedAmountPostTax = tryParseAmount(typedValueAfterTax, (isExactIn ? inputCurrency : outputCurrency) ?? undefined)
+  const bestTradeTaxedExactIn = useTradeExactIn(isExactIn ? parsedAmountPostTax : undefined, outputCurrency ?? undefined)
+  const bestTradeTaxedExactOut = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? parsedAmountPostTax : undefined)
+  const v2TradeWithTax = isExactIn ? bestTradeTaxedExactIn : bestTradeTaxedExactOut
+  // const v2Trade = isExactIn ? bestTradeExactIn : bestTradeTaxedExactOut
+  // end of doing the same thing
+  // const newTrade = useTradeExactOut(inputCurrency ?? undefined, !isExactIn ? remainingAfterTax : undefined)
+  // console.log('total tax num', totalTaxNumber)
+  // console.log(totalTaxFraction)
+  // console.log('remaining', remainingAfterTax)
+  // console.log('parsed amount', parsedAmount)
+
+  // console.log('custom amount of tax entered by user', customTaxInput)
 
   const currencyBalances = {
     [Field.INPUT]: relevantTokenBalances[0],
@@ -316,9 +405,9 @@ export function useDerivedSwapInfo(): {
   }
 
   const [allowedSlippage] = useUserSlippageTolerance()
-  const totalTaxNumber = totalTax ? parseFloat(totalTax.replace('%','')) * 100 : 0
+  const totalTaxBips = totalTaxNumber * 100
 
-  const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage + totalTaxNumber)
+  const slippageAdjustedAmounts = v2Trade && allowedSlippage && computeSlippageAdjustedAmounts(v2Trade, allowedSlippage + totalTaxBips)
   // compare input balance to max input based on version
   const [balanceIn, amountIn] = [
     currencyBalances[Field.INPUT],
@@ -334,6 +423,7 @@ export function useDerivedSwapInfo(): {
     currencyBalances,
     parsedAmount,
     v2Trade: v2Trade ?? undefined,
+    v2TradeWithTax: v2TradeWithTax ?? undefined,
     inputError,
   }
 }
@@ -390,6 +480,8 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
     },
     typedValue: parseTokenAmountURLParameter(parsedQs.exactAmount),
     totalTax: '0',
+    customTaxInput: '',
+    customTaxWallet: '',
     taxes: [],
     independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
     recipient,
@@ -414,6 +506,8 @@ export function useDefaultsFromURLSearch():
     dispatch(
       replaceSwapState({
         typedValue: parsed.typedValue,
+        customTaxInput: parsed.customTaxInput,
+        customTaxWallet: parsed.customTaxWallet,
         field: parsed.independentField,
         inputCurrencyId: parsed[Field.INPUT].currencyId,
         outputCurrencyId: parsed[Field.OUTPUT].currencyId,

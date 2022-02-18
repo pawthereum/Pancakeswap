@@ -1,10 +1,12 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax, setTaxes } from './actions'
+import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput, setTotalTax, setTaxes, customTaxInput, selectCustomTaxWallet } from './actions'
 
 export interface SwapState {
   readonly independentField: Field
   readonly totalTax: string
   readonly typedValue: string
+  readonly customTaxInput: string
+  readonly customTaxWallet: string
   readonly taxes: Array<{}>
   readonly [Field.INPUT]: {
     readonly currencyId: string | undefined
@@ -21,6 +23,8 @@ const initialState: SwapState = {
   totalTax: '0',
   taxes: [],
   typedValue: '',
+  customTaxInput: '',
+  customTaxWallet: '',
   [Field.INPUT]: {
     currencyId: '',
   },
@@ -34,7 +38,7 @@ export default createReducer<SwapState>(initialState, (builder) =>
   builder
     .addCase(
       replaceSwapState,
-      (state, { payload: { totalTax, taxes, typedValue, recipient, field, inputCurrencyId, outputCurrencyId } }) => {
+      (state, { payload: { totalTax, taxes, typedValue, customTaxInput, customTaxWallet, recipient, field, inputCurrencyId, outputCurrencyId } }) => {
         console.log('replace state', totalTax)
         return {
           [Field.INPUT]: {
@@ -48,6 +52,8 @@ export default createReducer<SwapState>(initialState, (builder) =>
           taxes,
           typedValue,
           recipient,
+          customTaxInput,
+          customTaxWallet,
         }
       }
     )
@@ -93,6 +99,14 @@ export default createReducer<SwapState>(initialState, (builder) =>
         independentField: field,
         typedValue,
       }
+    })
+    .addCase(customTaxInput, (state, { payload: { typedCustomTaxValue } }) => {
+      console.log('setting custom tax', customTaxInput)
+      state.customTaxInput = typedCustomTaxValue
+    })
+    .addCase(selectCustomTaxWallet, (state, { payload: { customTaxWallet } }) => {
+      console.log('setting custom tax wallet', customTaxWallet)
+      state.customTaxWallet = customTaxWallet
     })
     .addCase(setRecipient, (state, { payload: { recipient } }) => {
       console.log('setRecipient')

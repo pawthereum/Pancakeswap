@@ -17,6 +17,12 @@ export type PopupContent =
         auto: boolean
       }
     }
+  | {
+      message: {
+        success: boolean
+        body: string
+      }
+    }
 
 export const updateBlockNumber = createAction<{ chainId: number; blockNumber: number }>('app/updateBlockNumber')
 export const toggleWalletModal = createAction<void>('app/toggleWalletModal')

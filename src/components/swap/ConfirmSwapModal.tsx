@@ -1,4 +1,4 @@
-import { currencyEquals, Trade } from '@pancakeswap-libs/sdk'
+import { currencyEquals, Trade, TradeType } from '@pancakeswap-libs/sdk'
 import React, { useCallback, useMemo } from 'react'
 import TransactionConfirmationModal, {
   ConfirmationModalContent,
@@ -24,6 +24,7 @@ function tradeMeaningfullyDiffers(tradeA: Trade, tradeB: Trade): boolean {
 
 export default function ConfirmSwapModal({
   trade,
+  tradeWithTax,
   originalTrade,
   onAcceptChanges,
   allowedSlippage,
@@ -37,6 +38,7 @@ export default function ConfirmSwapModal({
 }: {
   isOpen: boolean
   trade: Trade | undefined
+  tradeWithTax: Trade | undefined
   originalTrade: Trade | undefined
   attemptingTxn: boolean
   txHash: string | undefined
@@ -56,6 +58,7 @@ export default function ConfirmSwapModal({
     return trade ? (
       <SwapModalHeader
         trade={trade}
+        tradeWithTax={tradeWithTax}
         allowedSlippage={allowedSlippage}
         recipient={recipient}
         showAcceptChanges={showAcceptChanges}
@@ -69,6 +72,7 @@ export default function ConfirmSwapModal({
       <SwapModalFooter
         onConfirm={onConfirm}
         trade={trade}
+        tradeWithTax={tradeWithTax}
         disabledConfirm={showAcceptChanges}
         swapErrorMessage={swapErrorMessage}
         allowedSlippage={allowedSlippage}
@@ -77,9 +81,11 @@ export default function ConfirmSwapModal({
   }, [allowedSlippage, onConfirm, showAcceptChanges, swapErrorMessage, trade])
 
   // text to show while loading
-  const pendingText = `Swapping ${trade?.inputAmount?.toSignificant(6)} ${
+  const pendingInput = trade?.tradeType === TradeType.EXACT_INPUT ? trade?.inputAmount?.toSignificant(6) : tradeWithTax?.inputAmount?.toSignificant(6)
+  const pendingOutput = trade?.tradeType === TradeType.EXACT_OUTPUT ? trade?.outputAmount?.toSignificant(6) : tradeWithTax?.outputAmount?.toSignificant(6)
+  const pendingText = `Swapping ${pendingInput} ${
     trade?.inputAmount?.currency?.symbol
-  } for ${trade?.outputAmount?.toSignificant(6)} ${trade?.outputAmount?.currency?.symbol}`
+  } for ${pendingOutput} ${trade?.outputAmount?.currency?.symbol}`
 
   const confirmationContent = useCallback(
     () =>

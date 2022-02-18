@@ -1,7 +1,10 @@
 import { ChainId, JSBI, Percent, Token, WETH } from '@pancakeswap-libs/sdk'
+import { customTaxWallets } from './customTaxWallets'
 
-export const ROUTER_ADDRESS = '0x58c7028A02C8e73C3d2dC784bcd90BD849a94Bde'
-export const PAWSWAP_ADDRESS = '0x9aE4AB89841DAf1B174cD9dbA10F8a493531d651'
+export const ROUTER_ADDRESS = '0x9a322c33F0A7290700AEfE962B3a6173e63e2b64'
+export const PAWSWAP_ADDRESS = '0xb670d81a3123672b9e41225c88bdc50973cf1d86'
+
+export const CUSTOM_TAX_WALLETS = customTaxWallets
 
 // a list of tokens by chain
 type ChainTokenList = {
@@ -15,7 +18,7 @@ export const BUSD = new Token(swapChainId, '0x78867BbEeF44f2326bF8DDd1941a443938
 export const USDT = new Token(swapChainId, '0x7ef95a0fee0dd31b22626fa2e10ee6a223f8a684', 18, 'USDT', 'Tether USD');
 export const ETH = new Token(swapChainId, '0x8babbb98678facc7342735486c851abd7a0d17ca', 18, 'ETH', 'Ethereum');
 export const WBNB = new Token(swapChainId, '0xae13d989dac2f0debff460ac112a837c89baa7cd', 18, 'WBNB', 'Wrapped BNB');
-export const PAWTH = new Token(swapChainId, '0x33ec6D5bdb757109C6929eB9c0B21c23f6a694a8', 9, 'PAWTH', 'Pawthereum')
+export const PAWTH = new Token(swapChainId, '0x5abd80b8108f90c8525a183547d6ecc004112c22', 9, 'PAWTH', 'Pawthereum')
 
 const WETH_ONLY: ChainTokenList = {
   [ChainId.MAINNET]: [WETH[ChainId.MAINNET]],
@@ -25,7 +28,7 @@ const WETH_ONLY: ChainTokenList = {
 // used to construct intermediary pairs for trading
 export const BASES_TO_CHECK_TRADES_AGAINST: ChainTokenList = {
   ...WETH_ONLY,
-  [swapChainId]: [...WETH_ONLY[swapChainId], DAI, BUSD, USDT, ETH],
+  [swapChainId]: [...WETH_ONLY[swapChainId], PAWTH, DAI, BUSD, USDT, ETH],
 }
 
 /**
@@ -39,17 +42,18 @@ export const CUSTOM_BASES: { [chainId in ChainId]?: { [tokenAddress: string]: To
 // used for display in the default list when adding liquidity
 export const SUGGESTED_BASES: ChainTokenList = {
   ...WETH_ONLY,
-  [swapChainId]: [...WETH_ONLY[swapChainId], DAI, BUSD, USDT],
+  [swapChainId]: [...WETH_ONLY[swapChainId], PAWTH, DAI, BUSD, USDT],
 }
 
 // used to construct the list of all pairs we consider by default in the frontend
 export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
   ...WETH_ONLY,
-  [swapChainId]: [...WETH_ONLY[swapChainId], DAI, BUSD, USDT],
+  [swapChainId]: [...WETH_ONLY[swapChainId], PAWTH, DAI, BUSD, USDT],
 }
 
 export const PINNED_PAIRS: { readonly [chainId in ChainId]?: [Token, Token][] } = {
   [swapChainId]: [
+    [ PAWTH, WBNB ],
     [ BUSD, WBNB ],
     [ WBNB, PAWTH],
     [ USDT, BUSD ],
