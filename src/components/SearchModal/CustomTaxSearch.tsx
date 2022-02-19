@@ -245,7 +245,7 @@ export function CustomTaxSearch({
               <Text fontSize="14px">Cause categories</Text>
               <QuestionHelper text={TranslateString(1204, 'Filter by categories that you care most about to find a matching cause.')} />
             </AutoRow>
-            <AutoRow gap="4px">
+            <AutoRow gap="4px" style={{ maxHeight: '150px', overflowY: 'scroll' }}>
               {(categories.map((c, i) => {
                 const selected = selectedCategories.includes(c)
                 return (
