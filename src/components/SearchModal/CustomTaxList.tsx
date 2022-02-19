@@ -3,7 +3,6 @@ import { CSSProperties, MutableRefObject, useCallback, useMemo } from 'react'
 import { FixedSizeList } from 'react-window'
 import styled from 'styled-components'
 import { Text } from '@pancakeswap-libs/uikit'
-import { useSelectedTokenList, WrappedTokenInfo } from '../../state/lists/hooks'
 import Column from '../Column'
 import ListLogo from '../ListLogo'
 import { MouseoverTooltip } from '../Tooltip'
@@ -19,7 +18,7 @@ interface Wallet {
 }
 
 function walletKey(wallet: Wallet): string {
-  return wallet ? wallet.address + Math.random().toString() : Math.random().toString()
+  return wallet ? wallet.address : Math.random().toString()
 }
 
 const Tag = styled.div`
@@ -74,7 +73,6 @@ function WalletRow({
   style: CSSProperties
 }) {
   const key = wallet ? walletKey(wallet) : Math.random()
-  const selectedTokenList = useSelectedTokenList()
 
   // only show add or remove buttons if not on selected list
   return (
