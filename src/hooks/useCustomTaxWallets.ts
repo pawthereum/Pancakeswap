@@ -1,0 +1,59 @@
+import { useEffect, useState } from 'react'
+
+interface Wallet {
+  address: string,
+  symbol: string,
+  name: string,
+  logo: string
+}
+
+type ApiResponse = {
+  nonprofits: Wallet[],
+  page: string
+}
+
+/**
+ * Due to Cors the api was forked and a proxy was created
+ * @see https://github.com/pancakeswap/gatsby-pancake-api/commit/e811b67a43ccc41edd4a0fa1ee704b2f510aa0ba
+ */
+const api = `https://api.getchange.io/api/v1/nonprofits?public_key=${process.env.REACT_APP_CHANGE_API_KEY}&search_term=`
+
+const useGetCustomWallets = (searchQuery) => {
+  console.log('search q', searchQuery)
+  const [data, setData] = useState<ApiResponse | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(api + searchQuery)
+        const json = await response.json()
+        console.log('json~~~~~~~', json)
+        const wallets = json.nonprofits.map(n => {
+          const wallet: Wallet = {
+            address: n.crypto.ethereum_address,
+            symbol: n.socials.twitter || n.socials.instagram || n.socials.facebook,
+            name: n.name,
+            logo: n.icon_url
+          }
+          return wallet
+        })
+        const formattedJson = {
+          nonprofits: wallets,
+          page: json.page
+        }
+        console.log('formattedJson', formattedJson)
+        const res: ApiResponse = formattedJson
+        
+        setData(res)
+      } catch (error) {
+        console.error('Unable to fetch custom wallet data:', error)
+      }
+    }
+
+    fetchData()
+  }, [setData, searchQuery])
+
+  return data?.nonprofits
+}
+
+export default useGetCustomWallets

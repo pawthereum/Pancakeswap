@@ -90,7 +90,7 @@ function WalletRow({
   otherSelected,
   style,
 }: {
-  wallet: Wallet
+  wallet: Wallet | undefined
   currency: Currency
   onSelect: () => void
   isSelected: boolean
@@ -111,13 +111,13 @@ function WalletRow({
       disabled={isSelected}
       selected={otherSelected}
     >
-      <ListLogo logoURI={wallet.logo} size="24px" />
+      <ListLogo logoURI={wallet?.logo || 'https://etherscan.io/images/main/empty-token.png'} size="24px" />
       <Column>
-        <Text title={wallet.name}>{wallet.symbol}</Text>
+        <Text title={wallet?.name}>{wallet?.symbol}</Text>
         <FadedSpan>
           {!isOnSelectedList && !customAdded && !(currency instanceof WrappedTokenInfo) ? (
             <Text>
-              {wallet.name}
+              {wallet?.name}
             </Text>
           ) : null}
         </FadedSpan>
@@ -138,8 +138,8 @@ export default function CustomTaxList({
   showETH,
 }: {
   height: number
-  currencies: Wallet[]
-  wallets: Wallet[]
+  currencies: Wallet[] | undefined
+  wallets: Wallet[] | undefined
   selectedCurrency?: Currency | null
   onCurrencySelect: (currency: Currency) => void
   onWalletSelect: (wallet: Wallet) => void
@@ -147,6 +147,7 @@ export default function CustomTaxList({
   fixedListRef?: MutableRefObject<FixedSizeList | undefined>
   showETH: boolean
 }) {
+  if (!currencies) return (<></>)
   const itemData = useMemo(() => (showETH ? [Currency.ETHER, ...currencies] : [...currencies]), [currencies, showETH])
 
   const Row = useCallback(
