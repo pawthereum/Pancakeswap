@@ -42,7 +42,7 @@ const useGetCustomWallets = (searchQuery, selectedCategories) => {
         const wallets = json.nonprofits.filter(n => n.crypto.ethereum_address).map(n => {
           const wallet: Wallet = {
             address: n.crypto.ethereum_address,
-            symbol: n.socials.twitter || n.socials.instagram || n.socials.facebook || n.name.match(/[A-Z]/g).join(''), // fallback to abbr.
+            symbol: n.socials.twitter || n.socials.instagram || n.name.match(/[A-Z]/g).join(''), // fallback to abbr.
             name: n.name,
             logo: n.icon_url,
             mission: n.mission,
