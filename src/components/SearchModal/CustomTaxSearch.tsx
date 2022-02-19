@@ -25,8 +25,24 @@ import SortButton from './SortButton'
 import { useTokenComparator } from './sorting'
 import { PaddedColumn, SearchInput, Separator } from './styleds'
 import useGetCustomWallets from 'hooks/useCustomTaxWallets'
+import { AutoRow } from '../Row'
+import { AutoColumn } from '../Column'
+import styled from 'styled-components'
 
-import { CUSTOM_TAX_WALLETS } from '../../constants'
+const BaseWrapper = styled.div<{ selected?: boolean }>`
+  border: 1px solid ${({ theme, selected }) => (selected ? theme.colors.primary : theme.colors.tertiary)};
+  border-radius: 10px;
+  display: flex;
+  padding: 6px;
+
+  align-items: center;
+  :hover {
+    cursor: pointer;
+    background-color: ${({ theme, selected }) => !selected && theme.colors.invertedContrast};
+  }
+
+  background-color: ${({ theme, selected }) => selected && theme.colors.tertiary};
+`
 
 interface Wallet {
   address: string,
@@ -65,7 +81,13 @@ export function CustomTaxSearch({
   const fixedList = useRef<FixedSizeList>()
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [invertSearchOrder, setInvertSearchOrder] = useState<boolean>(false)
-  const customWalletSearchResults = useGetCustomWallets(searchQuery)
+  const categories = [
+    'arts and culture', 'education', 'environment', 'animals', 'healthcare',
+    'human services', 'international affairs', 'public benefit', 'religion',
+    'mutual benefit', 'unclassified'
+  ]
+  const [selectedCategories, setSelectedCategories] = useState<Array<string>>([])
+  const customWalletSearchResults = useGetCustomWallets(searchQuery, selectedCategories)
   console.log('customWalletGetter', customWalletSearchResults)
   const allTokens = useAllTokens()
 
@@ -181,6 +203,13 @@ export function CustomTaxSearch({
     [filteredSortedTokens, handleCurrencySelect, searchQuery]
   )
 
+  const handleCategorySelect = (category: string) => {
+    if (selectedCategories.includes(category)) {
+      return setSelectedCategories(selectedCategories.filter(c => c !== category))
+    }
+    return setSelectedCategories(selectedCategories.concat([category]))
+  }
+
   const selectedListInfo = useSelectedListInfo()
   const TranslateString = useI18n()
   return (
@@ -210,6 +239,24 @@ export function CustomTaxSearch({
         {showCommonBases && (
           <CommonBases chainId={chainId} onSelect={handleCurrencySelect} selectedCurrency={selectedCurrency} />
         )}
+        <RowBetween>
+          <AutoColumn gap="md">
+            <AutoRow>
+              <Text fontSize="14px">Cause categories</Text>
+              <QuestionHelper text={TranslateString(1204, 'Filter by categories that you care most about to find a matching cause.')} />
+            </AutoRow>
+            <AutoRow gap="4px">
+              {(categories.map((c, i) => {
+                const selected = selectedCategories.includes(c)
+                return (
+                  <BaseWrapper selected={selected} onClick={() => handleCategorySelect(c)} key={c}>
+                    <Text>{c}</Text>
+                  </BaseWrapper>
+                )
+              }))}
+            </AutoRow>
+          </AutoColumn>
+        </RowBetween>
         <RowBetween>
           <Text fontSize="14px">{TranslateString(126, 'Wallet name')}</Text>
           <SortButton ascending={invertSearchOrder} toggleSortOrder={() => setInvertSearchOrder((iso) => !iso)} />

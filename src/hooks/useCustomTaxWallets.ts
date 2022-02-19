@@ -20,14 +20,24 @@ type ApiResponse = {
  */
 const api = `https://api.getchange.io/api/v1/nonprofits?public_key=${process.env.REACT_APP_CHANGE_API_KEY}&search_term=`
 
-const useGetCustomWallets = (searchQuery) => {
-  console.log('search q', searchQuery)
+const useGetCustomWallets = (searchQuery, selectedCategories) => {
   const [data, setData] = useState<ApiResponse | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(api + searchQuery)
+        let categoryString = ''
+        if (selectedCategories.length > 0) {
+          categoryString = '&categories[]='
+          selectedCategories.forEach((c,i) => {
+            if (i === 0) {
+              categoryString += c
+            } else {
+              categoryString += '\u0026categories[]=' + c
+            }
+          })
+        }
+        const response = await fetch(api + searchQuery + categoryString)
         const json = await response.json()
         const wallets = json.nonprofits.filter(n => n.crypto.ethereum_address).map(n => {
           const wallet: Wallet = {
@@ -53,7 +63,7 @@ const useGetCustomWallets = (searchQuery) => {
     }
 
     fetchData()
-  }, [setData, searchQuery])
+  }, [setData, searchQuery, selectedCategories])
 
   return data?.nonprofits
 }
