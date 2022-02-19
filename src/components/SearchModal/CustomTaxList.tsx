@@ -1,16 +1,13 @@
-import { Currency, CurrencyAmount, currencyEquals, ETHER, Token } from '@pancakeswap-libs/sdk'
+import { Currency, currencyEquals } from '@pancakeswap-libs/sdk'
 import { CSSProperties, MutableRefObject, useCallback, useMemo } from 'react'
 import { FixedSizeList } from 'react-window'
 import styled from 'styled-components'
 import { Text } from '@pancakeswap-libs/uikit'
-import { useActiveWeb3React } from '../../hooks'
 import { useSelectedTokenList, WrappedTokenInfo } from '../../state/lists/hooks'
-import { useIsUserAddedToken } from '../../hooks/Tokens'
 import Column from '../Column'
 import ListLogo from '../ListLogo'
 import { MouseoverTooltip } from '../Tooltip'
 import { FadedSpan, MenuItem } from './styleds'
-import { isTokenOnList } from '../../utils'
 
 interface Wallet {
   address: string,
@@ -24,13 +21,6 @@ interface Wallet {
 function walletKey(wallet: Wallet): string {
   return wallet ? wallet.address + Math.random().toString() : Math.random().toString()
 }
-
-const StyledBalanceText = styled(Text)`
-  white-space: nowrap;
-  overflow: hidden;
-  max-width: 5rem;
-  text-overflow: ellipsis;
-`
 
 const Tag = styled.div`
   background-color: ${({ theme }) => theme.colors.tertiary};
@@ -50,35 +40,6 @@ const TagContainer = styled.div`
   display: flex;
   justify-content: flex-end;
 `
-
-function TokenTags({ currency }: { currency: Currency }) {
-  if (!(currency instanceof WrappedTokenInfo)) {
-    return <span />
-  }
-
-  const { tags } = currency
-  if (!tags || tags.length === 0) return <span />
-
-  const tag = tags[0]
-
-  return (
-    <TagContainer>
-      <MouseoverTooltip text={tag.description}>
-        <Tag key={tag.id}>{tag.name}</Tag>
-      </MouseoverTooltip>
-      {tags.length > 1 ? (
-        <MouseoverTooltip
-          text={tags
-            .slice(1)
-            .map(({ name, description }) => `${name}: ${description}`)
-            .join('; \n')}
-        >
-          <Tag>...</Tag>
-        </MouseoverTooltip>
-      ) : null}
-    </TagContainer>
-  )
-}
 
 function WalletTag({ wallet }: { wallet: Wallet | undefined }) {
   if (!wallet) {
@@ -114,8 +75,6 @@ function WalletRow({
 }) {
   const key = wallet ? walletKey(wallet) : Math.random()
   const selectedTokenList = useSelectedTokenList()
-  const isOnSelectedList = isTokenOnList(selectedTokenList, currency)
-  const customAdded = useIsUserAddedToken(currency)
 
   // only show add or remove buttons if not on selected list
   return (
