@@ -32,7 +32,9 @@ interface Wallet {
   address: string,
   symbol: string,
   name: string,
-  logo: string
+  logo: string,
+  mission: string,
+  category: string,
 }
 
 interface CustomTaxSearchProps {
@@ -199,7 +201,7 @@ export function CustomTaxSearch({
         <SearchInput
           type="text"
           id="token-search-input"
-          placeholder={t('Custom Tax Wallet')}
+          placeholder={t('Search for a cause')}
           value={searchQuery}
           ref={inputRef as RefObject<HTMLInputElement>}
           onChange={handleInput}

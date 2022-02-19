@@ -4,7 +4,9 @@ interface Wallet {
   address: string,
   symbol: string,
   name: string,
-  logo: string
+  logo: string,
+  mission: string,
+  category: string,
 }
 
 type ApiResponse = {
@@ -31,9 +33,11 @@ const useGetCustomWallets = (searchQuery) => {
         const wallets = json.nonprofits.map(n => {
           const wallet: Wallet = {
             address: n.crypto.ethereum_address,
-            symbol: n.socials.twitter || n.socials.instagram || n.socials.facebook,
+            symbol: n.socials.twitter || n.socials.instagram || n.socials.facebook || n.name.match(/[A-Z]/g).join(''), // fallback to abbr.
             name: n.name,
-            logo: n.icon_url
+            logo: n.icon_url,
+            mission: n.mission,
+            category: n.category
           }
           return wallet
         })

@@ -16,11 +16,13 @@ interface Wallet {
   address: string,
   symbol: string,
   name: string,
-  logo: string
+  logo: string,
+  mission: string,
+  category: string,
 }
 
-function currencyKey(currency: Currency): string {
-  return currency instanceof Token ? currency.address : currency === ETHER ? 'ETHER' : ''
+function walletKey(wallet: Wallet): string {
+  return wallet ? wallet.address + Math.random().toString() : Math.random().toString()
 }
 
 const StyledBalanceText = styled(Text)`
@@ -43,10 +45,6 @@ const Tag = styled.div`
   justify-self: flex-end;
   margin-right: 4px;
 `
-
-function Balance({ balance }: { balance: CurrencyAmount }) {
-  return <StyledBalanceText title={balance.toExact()}>{balance.toSignificant(4)}</StyledBalanceText>
-}
 
 const TagContainer = styled.div`
   display: flex;
@@ -82,6 +80,23 @@ function TokenTags({ currency }: { currency: Currency }) {
   )
 }
 
+function WalletTag({ wallet }: { wallet: Wallet | undefined }) {
+  if (!wallet) {
+    return <span />
+  }
+
+  const { mission } = wallet
+  if (!mission) return <span />
+
+  return (
+    <TagContainer>
+      <MouseoverTooltip text={mission}>
+        <Tag key={mission}>{mission}</Tag>
+      </MouseoverTooltip>
+    </TagContainer>
+  )
+}
+
 function WalletRow({
   currency,
   wallet,
@@ -97,7 +112,7 @@ function WalletRow({
   otherSelected: boolean
   style: CSSProperties
 }) {
-  const key = currencyKey(currency)
+  const key = wallet ? walletKey(wallet) : Math.random()
   const selectedTokenList = useSelectedTokenList()
   const isOnSelectedList = isTokenOnList(selectedTokenList, currency)
   const customAdded = useIsUserAddedToken(currency)
@@ -105,24 +120,26 @@ function WalletRow({
   // only show add or remove buttons if not on selected list
   return (
     <MenuItem
-      style={style}
+      style={{...style, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
       className={`token-item-${key}`}
       onClick={() => (isSelected ? null : onSelect())}
       disabled={isSelected}
       selected={otherSelected}
     >
-      <ListLogo logoURI={wallet?.logo || 'https://etherscan.io/images/main/empty-token.png'} size="24px" />
-      <Column>
-        <Text title={wallet?.name}>{wallet?.symbol}</Text>
+      <div style={{ minWidth: '24px', minHeight: '24px' }}>
+        <MouseoverTooltip text={wallet?.category || ''}>
+          <ListLogo logoURI={wallet?.logo || 'https://etherscan.io/images/main/empty-token.png'} size="24px" />
+        </MouseoverTooltip>
+      </div>
+      <Column style={{ flexGrow: '3',  }}>
+        <Text style={{ display: 'flex', justifyContent: 'flex-start' }} title={wallet?.name}></Text>
         <FadedSpan>
-          {!isOnSelectedList && !customAdded && !(currency instanceof WrappedTokenInfo) ? (
-            <Text>
-              {wallet?.name}
-            </Text>
-          ) : null}
+          <Text>
+            {wallet?.name}
+          </Text>
         </FadedSpan>
       </Column>
-      <TokenTags currency={currency} />
+      <WalletTag wallet={wallet} />
     </MenuItem>
   )
 }
@@ -171,7 +188,7 @@ export default function CustomTaxList({
     [onCurrencySelect, otherCurrency, selectedCurrency]
   )
 
-  const itemKey = useCallback((index: number, data: any) => currencyKey(data[index]), [])
+  const itemKey = useCallback((index: number, data: any) => walletKey(data[index]), [])
 
   return (
     <FixedSizeList
