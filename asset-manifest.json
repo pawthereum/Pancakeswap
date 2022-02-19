@@ -1,30 +1,30 @@
 {
   "files": {
-    "main.js": "https://pawthereum.github.io/Pancakeswap/static/js/main.8af904ba.chunk.js",
-    "main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/main.8af904ba.chunk.js.map",
-    "runtime-main.js": "https://pawthereum.github.io/Pancakeswap/static/js/runtime-main.ee8e8d9a.js",
-    "runtime-main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/runtime-main.ee8e8d9a.js.map",
+    "main.js": "https://pawthereum.github.io/Pancakeswap/static/js/main.eebf5554.chunk.js",
+    "main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/main.eebf5554.chunk.js.map",
+    "runtime-main.js": "https://pawthereum.github.io/Pancakeswap/static/js/runtime-main.08e76fa8.js",
+    "runtime-main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/runtime-main.08e76fa8.js.map",
     "static/css/2.631bf38d.chunk.css": "https://pawthereum.github.io/Pancakeswap/static/css/2.631bf38d.chunk.css",
-    "static/js/2.26c4d882.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/2.26c4d882.chunk.js",
-    "static/js/2.26c4d882.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/2.26c4d882.chunk.js.map",
-    "static/js/3.d2fd2aa8.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/3.d2fd2aa8.chunk.js",
-    "static/js/3.d2fd2aa8.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/3.d2fd2aa8.chunk.js.map",
-    "static/js/4.e05b13e2.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/4.e05b13e2.chunk.js",
-    "static/js/4.e05b13e2.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/4.e05b13e2.chunk.js.map",
+    "static/js/2.4393e14e.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/2.4393e14e.chunk.js",
+    "static/js/2.4393e14e.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/2.4393e14e.chunk.js.map",
+    "static/js/3.a7ff7f3a.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/3.a7ff7f3a.chunk.js",
+    "static/js/3.a7ff7f3a.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/3.a7ff7f3a.chunk.js.map",
+    "static/js/4.1ddbb0e0.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/4.1ddbb0e0.chunk.js",
+    "static/js/4.1ddbb0e0.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/4.1ddbb0e0.chunk.js.map",
     "static/js/5.4aa88034.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/5.4aa88034.chunk.js",
     "static/js/5.4aa88034.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/5.4aa88034.chunk.js.map",
     "static/js/6.227344eb.chunk.js": "https://pawthereum.github.io/Pancakeswap/static/js/6.227344eb.chunk.js",
     "static/js/6.227344eb.chunk.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/6.227344eb.chunk.js.map",
     "index.html": "https://pawthereum.github.io/Pancakeswap/index.html",
     "static/css/2.631bf38d.chunk.css.map": "https://pawthereum.github.io/Pancakeswap/static/css/2.631bf38d.chunk.css.map",
-    "static/js/2.26c4d882.chunk.js.LICENSE.txt": "https://pawthereum.github.io/Pancakeswap/static/js/2.26c4d882.chunk.js.LICENSE.txt",
-    "static/js/3.d2fd2aa8.chunk.js.LICENSE.txt": "https://pawthereum.github.io/Pancakeswap/static/js/3.d2fd2aa8.chunk.js.LICENSE.txt",
+    "static/js/2.4393e14e.chunk.js.LICENSE.txt": "https://pawthereum.github.io/Pancakeswap/static/js/2.4393e14e.chunk.js.LICENSE.txt",
+    "static/js/3.a7ff7f3a.chunk.js.LICENSE.txt": "https://pawthereum.github.io/Pancakeswap/static/js/3.a7ff7f3a.chunk.js.LICENSE.txt",
     "static/media/inter.css": "https://pawthereum.github.io/Pancakeswap/static/media/Inter.var.c2fe3cb2.woff2"
   },
   "entrypoints": [
-    "static/js/runtime-main.ee8e8d9a.js",
+    "static/js/runtime-main.08e76fa8.js",
     "static/css/2.631bf38d.chunk.css",
-    "static/js/2.26c4d882.chunk.js",
-    "static/js/main.8af904ba.chunk.js"
+    "static/js/2.4393e14e.chunk.js",
+    "static/js/main.eebf5554.chunk.js"
   ]
 }
