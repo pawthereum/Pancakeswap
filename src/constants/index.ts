@@ -1,10 +1,9 @@
 import { ChainId, JSBI, Percent, Token, WETH } from '@pancakeswap-libs/sdk'
-import { customTaxWallets } from './customTaxWallets'
 
 export const ROUTER_ADDRESS = '0x9a322c33F0A7290700AEfE962B3a6173e63e2b64'
 export const PAWSWAP_ADDRESS = '0xb670d81a3123672b9e41225c88bdc50973cf1d86'
 
-export const CUSTOM_TAX_WALLETS = customTaxWallets
+export const PAWTH_CHARITY_WALLET = '0x9e84fe006aa1c290f4cbcd78be32131cbf52cb23'
 
 // a list of tokens by chain
 type ChainTokenList = {

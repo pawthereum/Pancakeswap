@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { PAWTH_CHARITY_WALLET } from '../constants'
 
 interface Wallet {
   address: string,
@@ -50,6 +51,15 @@ const useGetCustomWallets = (searchQuery, selectedCategories) => {
           }
           return wallet
         })
+        const pawthCharity: Wallet = {
+          address: PAWTH_CHARITY_WALLET,
+          symbol: 'PAWTH Charity',
+          name: 'Pawthereum Charity Wallet',
+          logo: 'https://pawthereum.com/wp-content/uploads/shared-files/pawth-logo-transparent.png',
+          mission: 'Pawthereum is a decentralized, community-run charity cryptocurrency project that gives back to animal shelters and advocates for the well-being of animals in need!',
+          category: 'animals'
+        }
+        wallets.unshift(pawthCharity)
         const formattedJson = {
           nonprofits: wallets,
           page: json.page
