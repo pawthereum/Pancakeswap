@@ -188,11 +188,11 @@ export function CustomTaxSearch({
       <PaddedColumn gap="14px">
         <RowBetween>
           <Text>
-            {TranslateString(82, 'Select a wallet')}
+            {TranslateString(82, 'Select a cause')}
             <QuestionHelper
               text={TranslateString(
                 128,
-                'Find a wallet by searching for its name or by pasting its address below.'
+                'Find a cause to optionally donate a portion of your transaction to.'
               )}
             />
           </Text>
