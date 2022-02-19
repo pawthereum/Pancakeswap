@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.js": "https://pawthereum.github.io/Pancakeswap/static/js/main.37080d4c.chunk.js",
-    "main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/main.37080d4c.chunk.js.map",
+    "main.js": "https://pawthereum.github.io/Pancakeswap/static/js/main.8af904ba.chunk.js",
+    "main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/main.8af904ba.chunk.js.map",
     "runtime-main.js": "https://pawthereum.github.io/Pancakeswap/static/js/runtime-main.ee8e8d9a.js",
     "runtime-main.js.map": "https://pawthereum.github.io/Pancakeswap/static/js/runtime-main.ee8e8d9a.js.map",
     "static/css/2.631bf38d.chunk.css": "https://pawthereum.github.io/Pancakeswap/static/css/2.631bf38d.chunk.css",
@@ -25,6 +25,6 @@
     "static/js/runtime-main.ee8e8d9a.js",
     "static/css/2.631bf38d.chunk.css",
     "static/js/2.26c4d882.chunk.js",
-    "static/js/main.37080d4c.chunk.js"
+    "static/js/main.8af904ba.chunk.js"
   ]
 }
