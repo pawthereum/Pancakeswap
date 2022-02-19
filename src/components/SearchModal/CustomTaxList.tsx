@@ -7,6 +7,7 @@ import Column from '../Column'
 import ListLogo from '../ListLogo'
 import { MouseoverTooltip } from '../Tooltip'
 import { FadedSpan, MenuItem } from './styleds'
+import { isMobile } from 'react-device-detect'
 
 interface Wallet {
   address: string,
@@ -96,7 +97,7 @@ function WalletRow({
           </Text>
         </FadedSpan>
       </Column>
-      <WalletTag wallet={wallet} />
+      { isMobile ? '' : <WalletTag wallet={wallet} /> }
     </MenuItem>
   )
 }
