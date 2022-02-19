@@ -24,6 +24,7 @@ import { filterTokens, filterWallets } from './filtering'
 import SortButton from './SortButton'
 import { useTokenComparator } from './sorting'
 import { PaddedColumn, SearchInput, Separator } from './styleds'
+import useGetCustomWallets from 'hooks/useCustomTaxWallets'
 
 import { CUSTOM_TAX_WALLETS } from '../../constants'
 
@@ -31,7 +32,9 @@ interface Wallet {
   address: string,
   symbol: string,
   name: string,
-  logo: string
+  logo: string,
+  mission: string,
+  category: string,
 }
 
 interface CustomTaxSearchProps {
@@ -62,9 +65,16 @@ export function CustomTaxSearch({
   const fixedList = useRef<FixedSizeList>()
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [invertSearchOrder, setInvertSearchOrder] = useState<boolean>(false)
+  const customWalletSearchResults = useGetCustomWallets(searchQuery)
+  console.log('customWalletGetter', customWalletSearchResults)
   const allTokens = useAllTokens()
 
-  const allWallets = CUSTOM_TAX_WALLETS
+  const allWallets: Wallet[] | undefined = useMemo(() => {
+    console.log('customwallet', customWalletSearchResults)
+    return customWalletSearchResults
+  }, [customWalletSearchResults])
+
+  // const allWallets = CUSTOM_TAX_WALLETS
 
   // if they input an address, use it
   const isAddressSearch = isAddress(searchQuery)
@@ -84,14 +94,14 @@ export function CustomTaxSearch({
     return filterTokens(Object.values(allTokens), searchQuery)
   }, [isAddressSearch, searchToken, allTokens, searchQuery])
 
-  const filteredWallets: Wallet[] = useMemo(() => {
-    // if (isAddressSearch) return searchToken ? [searchToken] : []
-    return filterWallets(Object.values(allWallets), searchQuery)
-  }, [isAddressSearch, allWallets, searchQuery])
+  // const filteredWallets: Wallet[] = useMemo(() => {
+  //   // if (isAddressSearch) return searchToken ? [searchToken] : []
+  //   return filterWallets(Object.values(allWallets), searchQuery)
+  // }, [isAddressSearch, allWallets, searchQuery])
 
-  const filteredSortedWallets: Wallet[] = useMemo(() => {
-    return filteredWallets
-  }, [filteredWallets, searchQuery])
+  // const filteredSortedWallets: Wallet[] = useMemo(() => {
+  //   return filteredWallets
+  // }, [filteredWallets, searchQuery])
 
   const filteredSortedTokens: Token[] = useMemo(() => {
     if (searchToken) return [searchToken]
@@ -178,11 +188,11 @@ export function CustomTaxSearch({
       <PaddedColumn gap="14px">
         <RowBetween>
           <Text>
-            {TranslateString(82, 'Select a wallet')}
+            {TranslateString(82, 'Select a cause')}
             <QuestionHelper
               text={TranslateString(
                 128,
-                'Find a wallet by searching for its name or by pasting its address below.'
+                'Find a cause to optionally donate a portion of your transaction to.'
               )}
             />
           </Text>
@@ -191,7 +201,7 @@ export function CustomTaxSearch({
         <SearchInput
           type="text"
           id="token-search-input"
-          placeholder={t('Custom Tax Wallet')}
+          placeholder={t('Search for a cause')}
           value={searchQuery}
           ref={inputRef as RefObject<HTMLInputElement>}
           onChange={handleInput}
@@ -214,8 +224,8 @@ export function CustomTaxSearch({
             <CustomTaxList
               height={height}
               showETH={false}
-              currencies={filteredSortedWallets}
-              wallets={filteredSortedWallets}
+              currencies={allWallets}
+              wallets={allWallets}
               onCurrencySelect={handleCurrencySelect}
               onWalletSelect={handleWalletSelect}
               otherCurrency={otherSelectedCurrency}

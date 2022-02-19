@@ -5,7 +5,9 @@ interface Wallet {
   address: string,
   name: string,
   symbol: string,
-  logo: string
+  logo: string,
+  mission: string,
+  category: string,
 }
 
 export function filterTokens(tokens: Token[], search: string): Token[] {

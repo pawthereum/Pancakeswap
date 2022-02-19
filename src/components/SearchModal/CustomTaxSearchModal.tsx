@@ -10,7 +10,9 @@ interface Wallet {
   address: string,
   symbol: string,
   name: string,
-  logo: string
+  logo: string,
+  mission: string,
+  category: string,
 }
 
 interface CustomTaxSearchModalProps {

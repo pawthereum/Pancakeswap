@@ -1,34 +1,25 @@
-import { Currency, CurrencyAmount, currencyEquals, ETHER, Token } from '@pancakeswap-libs/sdk'
+import { Currency, currencyEquals } from '@pancakeswap-libs/sdk'
 import { CSSProperties, MutableRefObject, useCallback, useMemo } from 'react'
 import { FixedSizeList } from 'react-window'
 import styled from 'styled-components'
 import { Text } from '@pancakeswap-libs/uikit'
-import { useActiveWeb3React } from '../../hooks'
-import { useSelectedTokenList, WrappedTokenInfo } from '../../state/lists/hooks'
-import { useIsUserAddedToken } from '../../hooks/Tokens'
 import Column from '../Column'
 import ListLogo from '../ListLogo'
 import { MouseoverTooltip } from '../Tooltip'
 import { FadedSpan, MenuItem } from './styleds'
-import { isTokenOnList } from '../../utils'
 
 interface Wallet {
   address: string,
   symbol: string,
   name: string,
-  logo: string
+  logo: string,
+  mission: string,
+  category: string,
 }
 
-function currencyKey(currency: Currency): string {
-  return currency instanceof Token ? currency.address : currency === ETHER ? 'ETHER' : ''
+function walletKey(wallet: Wallet): string {
+  return wallet ? wallet.address : Math.random().toString()
 }
-
-const StyledBalanceText = styled(Text)`
-  white-space: nowrap;
-  overflow: hidden;
-  max-width: 5rem;
-  text-overflow: ellipsis;
-`
 
 const Tag = styled.div`
   background-color: ${({ theme }) => theme.colors.tertiary};
@@ -44,40 +35,24 @@ const Tag = styled.div`
   margin-right: 4px;
 `
 
-function Balance({ balance }: { balance: CurrencyAmount }) {
-  return <StyledBalanceText title={balance.toExact()}>{balance.toSignificant(4)}</StyledBalanceText>
-}
-
 const TagContainer = styled.div`
   display: flex;
   justify-content: flex-end;
 `
 
-function TokenTags({ currency }: { currency: Currency }) {
-  if (!(currency instanceof WrappedTokenInfo)) {
+function WalletTag({ wallet }: { wallet: Wallet | undefined }) {
+  if (!wallet) {
     return <span />
   }
 
-  const { tags } = currency
-  if (!tags || tags.length === 0) return <span />
-
-  const tag = tags[0]
+  const { mission } = wallet
+  if (!mission) return <span />
 
   return (
     <TagContainer>
-      <MouseoverTooltip text={tag.description}>
-        <Tag key={tag.id}>{tag.name}</Tag>
+      <MouseoverTooltip text={mission}>
+        <Tag key={mission}>{mission}</Tag>
       </MouseoverTooltip>
-      {tags.length > 1 ? (
-        <MouseoverTooltip
-          text={tags
-            .slice(1)
-            .map(({ name, description }) => `${name}: ${description}`)
-            .join('; \n')}
-        >
-          <Tag>...</Tag>
-        </MouseoverTooltip>
-      ) : null}
     </TagContainer>
   )
 }
@@ -90,39 +65,38 @@ function WalletRow({
   otherSelected,
   style,
 }: {
-  wallet: Wallet
+  wallet: Wallet | undefined
   currency: Currency
   onSelect: () => void
   isSelected: boolean
   otherSelected: boolean
   style: CSSProperties
 }) {
-  const key = currencyKey(currency)
-  const selectedTokenList = useSelectedTokenList()
-  const isOnSelectedList = isTokenOnList(selectedTokenList, currency)
-  const customAdded = useIsUserAddedToken(currency)
+  const key = wallet ? walletKey(wallet) : Math.random()
 
   // only show add or remove buttons if not on selected list
   return (
     <MenuItem
-      style={style}
+      style={{...style, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
       className={`token-item-${key}`}
       onClick={() => (isSelected ? null : onSelect())}
       disabled={isSelected}
       selected={otherSelected}
     >
-      <ListLogo logoURI={wallet.logo} size="24px" />
-      <Column>
-        <Text title={wallet.name}>{wallet.symbol}</Text>
+      <div style={{ minWidth: '24px', minHeight: '24px' }}>
+        <MouseoverTooltip text={wallet?.category || ''}>
+          <ListLogo logoURI={wallet?.logo || 'https://etherscan.io/images/main/empty-token.png'} size="24px" />
+        </MouseoverTooltip>
+      </div>
+      <Column style={{ flexGrow: '3',  }}>
+        <Text style={{ display: 'flex', justifyContent: 'flex-start' }} title={wallet?.name}></Text>
         <FadedSpan>
-          {!isOnSelectedList && !customAdded && !(currency instanceof WrappedTokenInfo) ? (
-            <Text>
-              {wallet.name}
-            </Text>
-          ) : null}
+          <Text>
+            {wallet?.name}
+          </Text>
         </FadedSpan>
       </Column>
-      <TokenTags currency={currency} />
+      <WalletTag wallet={wallet} />
     </MenuItem>
   )
 }
@@ -138,8 +112,8 @@ export default function CustomTaxList({
   showETH,
 }: {
   height: number
-  currencies: Wallet[]
-  wallets: Wallet[]
+  currencies: Wallet[] | undefined
+  wallets: Wallet[] | undefined
   selectedCurrency?: Currency | null
   onCurrencySelect: (currency: Currency) => void
   onWalletSelect: (wallet: Wallet) => void
@@ -147,6 +121,7 @@ export default function CustomTaxList({
   fixedListRef?: MutableRefObject<FixedSizeList | undefined>
   showETH: boolean
 }) {
+  if (!currencies) return (<></>)
   const itemData = useMemo(() => (showETH ? [Currency.ETHER, ...currencies] : [...currencies]), [currencies, showETH])
 
   const Row = useCallback(
@@ -170,7 +145,7 @@ export default function CustomTaxList({
     [onCurrencySelect, otherCurrency, selectedCurrency]
   )
 
-  const itemKey = useCallback((index: number, data: any) => currencyKey(data[index]), [])
+  const itemKey = useCallback((index: number, data: any) => walletKey(data[index]), [])
 
   return (
     <FixedSizeList

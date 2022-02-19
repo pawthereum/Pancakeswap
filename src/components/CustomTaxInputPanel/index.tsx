@@ -13,6 +13,8 @@ import { Input as NumericalInput } from '../NumericalInput'
 import { useActiveWeb3React } from '../../hooks'
 import Tooltip from '../Tooltip'
 import ListLogo from 'components/ListLogo'
+import { useSwapState } from 'state/swap/hooks'
+import { Heart } from 'react-feather'
 
 const InputRow = styled.div<{ selected: boolean }>`
   display: flex;
@@ -92,7 +94,9 @@ interface Wallet {
   address: string,
   symbol: string,
   name: string,
-  logo: string
+  logo: string,
+  mission: string,
+  category: string,
 }
 
 interface CustomTaxInputPanelProps {
@@ -129,6 +133,7 @@ export default function CustomTaxInputPanel({
 }: CustomTaxInputPanelProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const { account } = useActiveWeb3React()
+  const { customTaxInput } = useSwapState()
   const selectedCurrencyBalance = useCurrencyBalance(account ?? undefined, currency ?? undefined)
   const TranslateString = useI18n()
   const translatedLabel = label || TranslateString(132, 'Input')
@@ -155,7 +160,7 @@ export default function CustomTaxInputPanel({
           <LabelRow>
             <RowBetween>
               <Text fontSize="14px">{translatedLabel}</Text>
-              {account && (
+              {account && !customTaxInput ? (
                 <>
                   <Tooltip 
                     text='Optionally send a percentage of your transaction to the wallet specified' 
@@ -166,7 +171,18 @@ export default function CustomTaxInputPanel({
                     </TagWrapper>
                   </Tooltip>
                 </>
-              )}
+              ) : (
+                <>
+                  <Tooltip 
+                    text='We believe that charitable crypto giving can change the world and it looks like you do too!' 
+                    show={show}
+                  >
+                    <TagWrapper onClick={open} onMouseEnter={open} onMouseLeave={close}>
+                      <Tag startIcon={<Heart size="14px" style={{ marginRight: '5px' }} />} scale="sm" variant='primary'>You are amazing!</Tag>
+                    </TagWrapper>
+                  </Tooltip>
+                </>
+              ) }
             </RowBetween>
           </LabelRow>
         )}
@@ -201,7 +217,7 @@ export default function CustomTaxInputPanel({
               }
                 <Text>
                   {
-                    wallet ? wallet.symbol : TranslateString(1196, 'Select a wallet')
+                    wallet ? wallet.symbol : TranslateString(1196, 'Select a cause')
                   }
                 </Text>
               {!disableCurrencySelect && <ChevronDownIcon />}
