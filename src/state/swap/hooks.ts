@@ -46,7 +46,7 @@ export function useSwapActionHandlers(): {
 
       if (currencyUpdate.currencyId === 'BNB' ||
           currencyUpdate.currencyId === 'ETH' ||
-          currencyUpdate.currencyId === '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd' // TESTNET BNB
+          currencyUpdate.currencyId === '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c' // TESTNET BNB
       ) return
       const taxes = await getTaxes(currencyUpdate.currencyId)
       console.log('taxes', taxes)
@@ -334,7 +334,7 @@ export function useDerivedSwapInfo(): {
   const v2Trade = isExactIn ? bestTradeExactIn : bestTradeExactOut
 
   let isBuy = true
-  const testnetBnb = '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd'
+  const testnetBnb = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
   const isETH = inputCurrencyId === 'ETH'
   const isBNB = inputCurrencyId === 'BNB'
   if (inputCurrencyId !== testnetBnb && !isETH && !isBNB) {

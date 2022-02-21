@@ -27,7 +27,7 @@ function TradeSummary({ trade, tradeWithTax, allowedSlippage }: { trade: Trade; 
   const slippageAdjustedAmountsWithTax = computeSlippageAdjustedAmounts(tradeWithTax, allowedSlippage)
   const slippageAdjustedAmounts = computeSlippageAdjustedAmounts(trade, allowedSlippage)
   const TranslateString = useI18n()
-  const testnetBnb = '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd'
+  const testnetBnb = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
   let isBuy = true
   if (INPUT.currencyId !== testnetBnb && INPUT.currencyId !== 'ETH' && INPUT.currencyId !== 'BNB') {
     isBuy = false

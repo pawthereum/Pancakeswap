@@ -16,7 +16,7 @@ export const DAI = new Token(swapChainId, '0x8a9424745056Eb399FD19a0EC26A1431668
 export const BUSD = new Token(swapChainId, '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7', 18, 'BUSD', 'Binance USD');
 export const USDT = new Token(swapChainId, '0x7ef95a0fee0dd31b22626fa2e10ee6a223f8a684', 18, 'USDT', 'Tether USD');
 export const ETH = new Token(swapChainId, '0x8babbb98678facc7342735486c851abd7a0d17ca', 18, 'ETH', 'Ethereum');
-export const WBNB = new Token(swapChainId, '0xae13d989dac2f0debff460ac112a837c89baa7cd', 18, 'WBNB', 'Wrapped BNB');
+export const WBNB = new Token(swapChainId, '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c', 18, 'WBNB', 'Wrapped BNB');
 export const PAWTH = new Token(swapChainId, '0x5abd80b8108f90c8525a183547d6ecc004112c22', 9, 'PAWTH', 'Pawthereum')
 
 const WETH_ONLY: ChainTokenList = {

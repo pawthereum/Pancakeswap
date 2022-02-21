@@ -1406,7 +1406,7 @@ var Router = /*#__PURE__*/function () {
     var path = trade.route.path.map(function (token) {
       return token.address;
     });
-    var nativeToken = '0xae13d989dac2f0debff460ac112a837c89baa7cd'
+    var nativeToken = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
     var deadline = "0x" + (Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16);
     var useFeeOnTransfer = Boolean(options.feeOnTransfer);
     var methodName;
