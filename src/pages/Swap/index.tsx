@@ -198,7 +198,7 @@ const Swap = () => {
     const custom = taxes.find(t => t['isCustom'])
     !custom
       ? setCustomTax({ name: '', exists: false })
-      : setCustomTax({ name: custom['name'], exists: true })
+      : custom['name'] !== '0' ? setCustomTax({ name: custom['name'], exists: true }) : false
   }, [taxes])
 
   const maxAmountInput: CurrencyAmount | undefined = maxAmountSpend(currencyBalances[Field.INPUT])
