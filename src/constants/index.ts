@@ -10,7 +10,10 @@ type ChainTokenList = {
   readonly [chainId in ChainId]: Token[]
 }
 
-const swapChainId = ChainId.BSCTESTNET;
+// const swapChainId = ChainId.BSCTESTNET;
+const swapChainId = ChainId.MAINNET;
+console.log('swap chain id', swapChainId)
+console.log('Chain Id', ChainId)
 
 export const DAI = new Token(swapChainId, '0x8a9424745056Eb399FD19a0EC26A14316684e274', 18, 'DAI', 'Dai Stablecoin');
 export const BUSD = new Token(swapChainId, '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7', 18, 'BUSD', 'Binance USD');
