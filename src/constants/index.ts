@@ -1,6 +1,6 @@
 import { ChainId, JSBI, Percent, Token, WETH } from '@pancakeswap-libs/sdk'
 
-export const ROUTER_ADDRESS = '0x0372ee530e69E4e39b3da5d2b4a8AafEeacD065c'
+export const ROUTER_ADDRESS = '0xc2a8dD01aabB1e21bF2535Ca1C222ffC916e6609'
 export const PAWSWAP_ADDRESS = '0xEa315BB312D6aDDc5d1F4365C1aCdfa81194404E'
 
 export const PAWTH_CHARITY_WALLET = '0x9e84fe006aa1c290f4cbcd78be32131cbf52cb23'
@@ -15,10 +15,10 @@ const swapChainId = ChainId.MAINNET;
 console.log('swap chain id', swapChainId)
 console.log('Chain Id', ChainId)
 
-export const DAI = new Token(swapChainId, '0x8a9424745056Eb399FD19a0EC26A14316684e274', 18, 'DAI', 'Dai Stablecoin');
-export const BUSD = new Token(swapChainId, '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7', 18, 'BUSD', 'Binance USD');
-export const USDT = new Token(swapChainId, '0x7ef95a0fee0dd31b22626fa2e10ee6a223f8a684', 18, 'USDT', 'Tether USD');
-export const ETH = new Token(swapChainId, '0x8babbb98678facc7342735486c851abd7a0d17ca', 18, 'ETH', 'Ethereum');
+export const DAI = new Token(swapChainId, '0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3', 18, 'DAI', 'Dai Stablecoin');
+export const BUSD = new Token(swapChainId, '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', 18, 'BUSD', 'Binance USD');
+export const USDT = new Token(swapChainId, '0x55d398326f99059fF775485246999027B3197955', 18, 'USDT', 'Tether USD');
+export const ETH = new Token(swapChainId, '0x2170Ed0880ac9A755fd29B2688956BD959F933F8', 18, 'ETH', 'Ethereum');
 export const WBNB = new Token(swapChainId, '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c', 18, 'WBNB', 'Wrapped BNB');
 export const PAWTH = new Token(swapChainId, '0x409e215738E31d8aB252016369c2dd9c2008Fee0', 9, 'PAWTH', 'Pawthereum')
 
