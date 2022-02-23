@@ -3,6 +3,7 @@ import flatMap from 'lodash.flatmap'
 import { useCallback, useMemo } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { BASES_TO_TRACK_LIQUIDITY_FOR, PINNED_PAIRS } from '../../constants'
+import defaultTokenJson from '../../constants/token/pancakeswap.json'
 
 import { useActiveWeb3React } from '../../hooks'
 // eslint-disable-next-line import/no-cycle
@@ -192,7 +193,16 @@ export function usePairAdder(): (pair: Pair) => void {
  * @param tokenB the other token
  */
 export function toV2LiquidityToken([tokenA, tokenB]: [Token, Token]): Token {
-  return new Token(tokenA.chainId, Pair.getAddress(tokenA, tokenB), 18, 'Paw-LP', 'Pawswap LPs')
+  const tokenList = defaultTokenJson.tokens
+  const tokenAUsesPancake = tokenList.find(t => t.address === tokenA?.address)?.dex === "pancakeswap"
+  const tokennBUsesPancake = tokenList.find(t => t.address === tokenB?.address)?.dex === "pancakeswap"
+  const usePancake = tokenAUsesPancake || tokennBUsesPancake
+
+  if (usePancake) {
+    return new Token(tokenA.chainId, Pair.getAddress(tokenA, tokenB, true), 18, 'CAKE-LP', 'Pancake LPs')
+  } else {
+    return new Token(tokenA.chainId, Pair.getAddress(tokenA, tokenB, false), 18, 'Paw-LP', 'Pawswap LPs')
+  }
 }
 
 /**

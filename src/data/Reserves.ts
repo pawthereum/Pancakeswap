@@ -6,6 +6,7 @@ import { useActiveWeb3React } from '../hooks'
 
 import { useMultipleContractSingleData } from '../state/multicall/hooks'
 import { wrappedCurrency } from '../utils/wrappedCurrency'
+import defaultTokenJson from '../constants/token/pancakeswap.json'
 
 const PAIR_INTERFACE = new Interface(IUniswapV2PairABI)
 
@@ -28,10 +29,15 @@ export function usePairs(currencies: [Currency | undefined, Currency | undefined
     [chainId, currencies]
   )
 
+  const tokenList = defaultTokenJson.tokens
+
   const pairAddresses = useMemo(
     () =>
       tokens.map(([tokenA, tokenB]) => {
-        return tokenA && tokenB && !tokenA.equals(tokenB) ? Pair.getAddress(tokenA, tokenB) : undefined
+        const tokenAUsesPancake = tokenList.find(t => t.address === tokenA?.address)?.dex === "pancakeswap"
+        const tokennBUsesPancake = tokenList.find(t => t.address === tokenB?.address)?.dex === "pancakeswap"
+        const usePancake = tokenAUsesPancake || tokennBUsesPancake
+        return tokenA && tokenB && !tokenA.equals(tokenB) ? Pair.getAddress(tokenA, tokenB, usePancake) : undefined
       }),
     [tokens]
   )

@@ -63,6 +63,8 @@ function useSwapCallArguments(
 
     const swapMethods = []
 
+    console.log('custom tax wallet in swap', customTaxWallet)
+
     swapMethods.push(
       // @ts-ignore
       Router.swapCallParameters(trade, tradeWithTax, {
