@@ -35,8 +35,8 @@ var Rounding;
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(Rounding || (Rounding = {}));
 
-var FACTORY_ADDRESS = '0xC30081B278e65721E06e43beC37C5e8B60Fd7DE6';
-var INIT_CODE_HASH = '0x753cb97aa857b087c909a0f0212a1627b6e11c18620022422286091613b2c5e1';
+var FACTORY_ADDRESS = '0x8327e6DD02d0DA4Bf78e2Aa04674f282d9A9c0E7';
+var INIT_CODE_HASH = '0xcc135136b25363b0759505cb047fc2813d0d382d457af85b3b25c6f797e2920a';
 var PANCAKE_FACTORY_ADDRESS = '0xca143ce32fe78f1f7019d7d551a6402fc5350c73';
 var PANCAKE_INIT_CODE_HASH = '0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5';
 var MINIMUM_LIQUIDITY = /*#__PURE__*/JSBI.BigInt(1000); // exports for internal consumption
@@ -1392,6 +1392,7 @@ var Router = /*#__PURE__*/function () {
 
 
   Router.swapCallParameters = function swapCallParameters(trade, tradeWithTax, options) {
+    var nativeToken = '0xae13d989dac2f0debff460ac112a837c89baa7cd'//'0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
     var etherIn = trade.inputAmount.currency === ETHER;
     var etherOut = trade.outputAmount.currency === ETHER; // the router does not support both ether in and out
     console.log('trade', trade)
@@ -1412,7 +1413,6 @@ var Router = /*#__PURE__*/function () {
     var path = trade.route.path.map(function (token) {
       return token.address;
     });
-    var nativeToken = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
     var deadline = "0x" + (Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16);
     var useFeeOnTransfer = Boolean(options.feeOnTransfer);
     var methodName;

@@ -2622,7 +2622,7 @@ var templateObject_1$E;
 var PriceLink = styled.a(templateObject_1$F || (templateObject_1$F = __makeTemplateObject(["\n  display: flex;\n  align-items: center;\n  svg {\n    transition: transform 0.3s;\n  }\n  :hover {\n    svg {\n      transform: scale(1.2);\n    }\n  }\n"], ["\n  display: flex;\n  align-items: center;\n  svg {\n    transition: transform 0.3s;\n  }\n  :hover {\n    svg {\n      transform: scale(1.2);\n    }\n  }\n"])));
 var CakePrice = function (_a) {
     var cakePriceUsd = _a.cakePriceUsd;
-    return cakePriceUsd ? (React.createElement(PriceLink, { href: "https://bscscan.com/token/0x409e215738E31d8aB252016369c2dd9c2008Fee0", target: "_blank" },
+    return cakePriceUsd ? (React.createElement(PriceLink, { href: "https://bscscan.com/token/0x5aBD80b8108f90c8525a183547D6ecc004112C22", target: "_blank" },
         // React.createElement(Icon$y, { width: "24px", mr: "8px" }),
         React.createElement("img", { src: 'https://pawthereum.com/wp-content/uploads/shared-files/pawth-logo-transparent.png', height: '24px', width: '24px' }, null),
         React.createElement(Text, { color: "textSubtle", bold: true }, "$" + cakePriceUsd.toFixed(4)))) : (React.createElement(Skeleton, { width: 80, height: 24 }));
