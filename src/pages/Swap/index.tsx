@@ -1,7 +1,7 @@
 import { CurrencyAmount, JSBI, Token, Trade, TradeType } from '@pancakeswap-libs/sdk'
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { ArrowDown, MoreHorizontal } from 'react-feather'
-import { CardBody, ArrowDownIcon, Won, Button, IconButton, Text } from '@pancakeswap-libs/uikit'
+import { ArrowDown, CheckCircle, MoreHorizontal } from 'react-feather'
+import { Tag, CardBody, ArrowDownIcon, Button, IconButton, Text } from '@pancakeswap-libs/uikit'
 import { ThemeContext } from 'styled-components'
 import AddressInputPanel from 'components/AddressInputPanel'
 import Card, { GreyCard } from 'components/Card'
@@ -37,7 +37,35 @@ import PageHeader from 'components/PageHeader'
 import ConnectWalletButton from 'components/ConnectWalletButton'
 import AppBody from '../AppBody'
 import { useAddPopup } from '../../state/application/hooks'
+import defaultTokenJson from '../../constants/token/pancakeswap.json'
+import Tooltip from '../../components/Tooltip'
+import styled from 'styled-components'
 
+interface TokenData {
+  name: string;
+  symbol: string;
+  typicalBuyTax: number;
+  typicalSellTax: number;
+}
+
+const TagWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  outline: none;
+  cursor: default;
+  border-radius: 36px;
+  background-color: ${({ theme }) => theme.colors.invertedContrast};
+  color: ${({ theme }) => theme.colors.textSubtle};
+
+  :hover,
+  :focus {
+    opacity: 0.7;
+  }
+`
 
 const Swap = () => {
   const loadedUrlParams = useDefaultsFromURLSearch()
@@ -74,7 +102,7 @@ const Swap = () => {
   const [allowedSlippage] = useUserSlippageTolerance()
 
   // swap state
-  const { independentField, typedValue, customTaxInput, customTaxWallet, recipient, totalTax, taxes } = useSwapState()
+  const { independentField, typedValue, customTaxInput, customTaxWallet, recipient, taxes } = useSwapState()
   const { v2Trade, v2TradeWithTax, currencyBalances, parsedAmount, currencies, inputError: swapInputError } = useDerivedSwapInfo()
   const { wrapType, execute: onWrap, inputError: wrapInputError } = useWrapCallback(
     currencies[Field.INPUT],
@@ -194,11 +222,10 @@ const Swap = () => {
   )
 
   useEffect(() => {
-    console.log('updating taxes...')
     const custom = taxes.find(t => t['isCustom'])
     !custom
       ? setCustomTax({ name: '', exists: false })
-      : custom['name'] !== '0' ? setCustomTax({ name: custom['name'], exists: true }) : false
+      : custom['name'] !== '0' && custom['name'] !== '' ? setCustomTax({ name: custom['name'], exists: true }) : setCustomTax({ name: '', exists: false })
   }, [taxes])
 
   const maxAmountInput: CurrencyAmount | undefined = maxAmountSpend(currencyBalances[Field.INPUT])
@@ -287,10 +314,30 @@ const Swap = () => {
     [setIsSyrup, setSyrupTransactionType]
   )
 
+  const [nonNativeToken, setNonNativeToken] = useState<TokenData>({
+    name: '',
+    symbol: '',
+    typicalBuyTax: 0,
+    typicalSellTax: 0,
+  })
+
+  const [isBuyingNonNativeToken, setIsBuyingNonNativeToken] = useState(false)
+
   const handleInputSelect = useCallback(
     (inputCurrency) => {
       setApprovalSubmitted(false) // reset 2 step UI for approvals
       onCurrencySelection(Field.INPUT, inputCurrency)
+      toggleHideSavings(false)
+      if (inputCurrency.symbol.toLowerCase() !== 'bnb') {
+        const tokenData = defaultTokenJson.tokens.find(t => t.symbol === inputCurrency.symbol)
+        if (tokenData) { setNonNativeToken({
+          name: tokenData.name,
+          typicalBuyTax: tokenData.typicalBuyTax,
+          typicalSellTax: tokenData.typicalSellTax,
+          symbol: tokenData.symbol
+        })}
+        setIsBuyingNonNativeToken(false)
+      }
       if (inputCurrency.symbol.toLowerCase() === 'syrup') {
         checkForSyrup(inputCurrency.symbol.toLowerCase(), 'Selling')
       }
@@ -307,6 +354,17 @@ const Swap = () => {
   const handleOutputSelect = useCallback(
     (outputCurrency) => {
       onCurrencySelection(Field.OUTPUT, outputCurrency)
+      toggleHideSavings(false)
+      if (outputCurrency.symbol.toLowerCase() !== 'bnb') {
+        const tokenData = defaultTokenJson.tokens.find(t => t.symbol === outputCurrency.symbol)
+        if (tokenData) { setNonNativeToken({
+          name: tokenData.name,
+          typicalBuyTax: tokenData.typicalBuyTax,
+          typicalSellTax: tokenData.typicalSellTax,
+          symbol: tokenData.symbol
+        })}
+        setIsBuyingNonNativeToken(true)
+      }
       if (outputCurrency.symbol.toLowerCase() === 'syrup') {
         checkForSyrup(outputCurrency.symbol.toLowerCase(), 'Buying')
       }
@@ -321,6 +379,45 @@ const Swap = () => {
     },
     [onCustomTaxWalletSelection]
   )
+
+  const [taxSavings, setTaxSavings] = useState(0)
+
+  useEffect(() => {
+    if (isBuyingNonNativeToken) {
+      const tax = taxes.find(t => t['isTotal'])
+      const taxAmount = tax ? tax['buyAmount'].replace('%', '') : '0'
+      return setTaxSavings(nonNativeToken.typicalBuyTax - parseFloat(taxAmount))
+    }
+    const tax = taxes.find(t => t['isTotal'])
+    const taxAmount = tax ? tax['sellAmount'].replace('%', '') : '0'
+    return setTaxSavings(nonNativeToken.typicalSellTax - parseFloat(taxAmount))
+  }, [taxes, isBuyingNonNativeToken])
+
+  const taxSavingsText = () => {
+    if (!nonNativeToken) return ''
+    let text = `${nonNativeToken?.symbol} usually has a `
+    if (isBuyingNonNativeToken) {
+      text += `buy tax of ${nonNativeToken.typicalBuyTax}%. `
+    } else {
+      text += `sell tax of ${nonNativeToken.typicalSellTax}%. `
+    }
+    text += `Would you consider donating a portion of your transaction to a good cause?`
+    return text
+  }
+
+  const [hideSavings, setHideSavings] = useState(false)
+
+  function toggleHideSavings(toggle) {
+    setHideSavings(toggle)
+  }
+
+  const showCustomTax = () => {
+    return !hideSavings && taxSavings > 0 && trade !== undefined
+  }
+
+  const [show, setShow] = useState<boolean>(false)
+  const open = useCallback(() => setShow(true), [setShow])
+  const close = useCallback(() => setShow(false), [setShow])
 
   return (
     <>
@@ -380,6 +477,7 @@ const Swap = () => {
                       onClick={() => {
                         setApprovalSubmitted(false) // reset 2 step UI for approvals
                         onSwitchTokens()
+                        setIsBuyingNonNativeToken(!isBuyingNonNativeToken)
                       }}
                       style={{ borderRadius: '50%' }}
                       scale="sm"
@@ -413,14 +511,30 @@ const Swap = () => {
                 <>
                   <AutoColumn justify="space-between">
                     <AutoRow justify={isExpertMode ? 'space-between' : 'center'} style={{ padding: '0 1rem' }}>
-                      <ArrowWrapper clickable>
-                        <IconButton variant="tertiary"
-                          style={{ borderRadius: '50%' }}
-                          scale="sm"
+                      {showCustomTax() ? (
+                        <Tooltip 
+                          text={taxSavingsText()} 
+                          show={show}
                         >
-                          <MoreHorizontal />
-                        </IconButton>
-                      </ArrowWrapper>
+                          <TagWrapper onClick={open} onMouseEnter={open} onMouseLeave={close}>
+                            <Tag 
+                              variant='success' 
+                              startIcon={<CheckCircle style={{ fill: 'none', marginRight: '5px' }} />}
+                            >
+                              {`You're saving ${taxSavings}%!`}
+                            </Tag>
+                          </TagWrapper>
+                        </Tooltip>
+                      ) : (
+                        <ArrowWrapper clickable>
+                          <IconButton variant="tertiary"
+                            style={{ borderRadius: '50%' }}
+                            scale="sm"
+                          >
+                            <MoreHorizontal />
+                          </IconButton>
+                        </ArrowWrapper> 
+                      )}
                     </AutoRow>
                   </AutoColumn>
                   <CustomTaxInputPanel
@@ -433,6 +547,28 @@ const Swap = () => {
                     otherCurrency={currencies[Field.INPUT]}
                     id="swap-currency-output"
                   />
+                  {showWrap ? null : (
+                    <Card padding=".25rem .75rem 0 .75rem" borderRadius="20px">
+                      <AutoColumn gap="4px">
+                        {Boolean(trade) && (
+                          <RowBetween align="center">
+                            <Text fontSize="14px">{TranslateString(1182, 'Price')}</Text>
+                            <TradePrice
+                              price={trade?.executionPrice}
+                              showInverted={showInverted}
+                              setShowInverted={setShowInverted}
+                            />
+                          </RowBetween>
+                        )}
+                        {allowedSlippage !== INITIAL_ALLOWED_SLIPPAGE && (
+                          <RowBetween align="center">
+                            <Text fontSize="14px">{TranslateString(88, 'Slippage Tolerance')}</Text>
+                            <Text fontSize="14px">{allowedSlippage / 100}%</Text>
+                          </RowBetween>
+                        )}
+                      </AutoColumn>
+                    </Card>
+                  )}
                 </>
               }
 
@@ -450,28 +586,6 @@ const Swap = () => {
                 </>
               ) : null}
 
-              {showWrap ? null : (
-                <Card padding=".25rem .75rem 0 .75rem" borderRadius="20px">
-                  <AutoColumn gap="4px">
-                    {Boolean(trade) && (
-                      <RowBetween align="center">
-                        <Text fontSize="14px">{TranslateString(1182, 'Price')}</Text>
-                        <TradePrice
-                          price={trade?.executionPrice}
-                          showInverted={showInverted}
-                          setShowInverted={setShowInverted}
-                        />
-                      </RowBetween>
-                    )}
-                    {allowedSlippage !== INITIAL_ALLOWED_SLIPPAGE && (
-                      <RowBetween align="center">
-                        <Text fontSize="14px">{TranslateString(88, 'Slippage Tolerance')}</Text>
-                        <Text fontSize="14px">{allowedSlippage / 100}%</Text>
-                      </RowBetween>
-                    )}
-                  </AutoColumn>
-                </Card>
-              )}
             </AutoColumn>
             <BottomGrouping>
               {!account ? (
