@@ -1,4 +1,4 @@
-import { CurrencyAmount, JSBI, Token, Trade, TradeType } from 'plugins/pawswap-libs/sdk'
+import { Currency, CurrencyAmount, JSBI, Token, Trade, TradeType } from 'plugins/pawswap-libs/sdk'
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { ArrowDown, CheckCircle, MoreHorizontal } from 'react-feather'
 import { Tag, CardBody, ArrowDownIcon, Button, IconButton, Text } from 'plugins/pawswap-libs/uikit'
@@ -338,6 +338,10 @@ const Swap = () => {
           typicalSellTax: tokenData.typicalSellTax,
           symbol: tokenData.symbol
         })}
+        // do not allowing swapping to anything else other than BNB
+        if (currencies[Field.OUTPUT]?.symbol !== 'BNB' && currencies[Field.OUTPUT]?.symbol !== 'WBNB') {
+          onCurrencySelection(Field.OUTPUT, Currency.ETHER)
+        }
         setIsBuyingNonNativeToken(false)
       }
       if (inputCurrency.symbol.toLowerCase() === 'syrup') {
@@ -365,6 +369,10 @@ const Swap = () => {
           typicalSellTax: tokenData.typicalSellTax,
           symbol: tokenData.symbol
         })}
+        // do not allowing swapping to anything else other than BNB
+        if (currencies[Field.INPUT]?.symbol !== 'BNB' && currencies[Field.INPUT]?.symbol !== 'WBNB') {
+          onCurrencySelection(Field.INPUT, Currency.ETHER)
+        }
         setIsBuyingNonNativeToken(true)
       }
       if (outputCurrency.symbol.toLowerCase() === 'syrup') {
