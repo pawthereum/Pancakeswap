@@ -13,18 +13,28 @@
     {
       "name": "Pawthereum",
       "symbol": "PAWTH",
-      "address": "0x409e215738E31d8aB252016369c2dd9c2008Fee0",
-      "chainId": 56,
+      "address": "0x3bae287fF1754bB2D390bFF103C998F9479B049d",
+      "chainId": 97,
       "decimals": 9,
       "logoURI": "https://pawthereum.com/wp-content/uploads/shared-files/pawth-logo-transparent.png",
       "typicalBuyTax": 8,
       "typicalSellTax": 8
     },
     {
+      "name": "Wrapped BNB",
+      "symbol": "WBNB",
+      "address": "0xae13d989dac2f0debff460ac112a837c89baa7cd",
+      "chainId": 97,
+      "decimals": 18,
+      "logoURI": "https://pancake.kiemtienonline360.com/images/coins/0xae13d989dac2f0debff460ac112a837c89baa7cd.png",
+      "typicalBuyTax": 0,
+      "typicalSellTax": 0
+    },
+    {
       "name": "Kodi Coin",
       "symbol": "KODI",
-      "address": "0xbA5eAB68a7203C9FF72E07b708991F07f55eF40E",
-      "chainId": 56,
+      "address": "0x71a3406E8A04ec52b7f7aCcE94C93f7a48FBF2C9",
+      "chainId": 97,
       "decimals": 18,
       "logoURI": "https://bafybeievtapjdh32pqp3kljnhhymzf6fc2kxkqsajsujac34j5wto3aisy.ipfs.infura-ipfs.io",
       "dex": "pancakeswap",

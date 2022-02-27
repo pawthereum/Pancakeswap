@@ -70,6 +70,7 @@ const TagWrapper = styled.div`
 const Swap = () => {
   const loadedUrlParams = useDefaultsFromURLSearch()
   const TranslateString = useI18n()
+  const testnetBnb = '0xae13d989dac2f0debff460ac112a837c89baa7cd'
 
   // token warning stuff
   const [loadedInputCurrency, loadedOutputCurrency] = [
@@ -328,7 +329,8 @@ const Swap = () => {
       setApprovalSubmitted(false) // reset 2 step UI for approvals
       onCurrencySelection(Field.INPUT, inputCurrency)
       toggleHideSavings(false)
-      if (inputCurrency.symbol.toLowerCase() !== 'bnb') {
+      console.log('input currenc', inputCurrency)
+      if (inputCurrency.symbol.toLowerCase() !== 'bnb' && inputCurrency.address.toLowerCase() !== testnetBnb) {
         const tokenData = defaultTokenJson.tokens.find(t => t.symbol === inputCurrency.symbol)
         if (tokenData) { setNonNativeToken({
           name: tokenData.name,
@@ -355,7 +357,7 @@ const Swap = () => {
     (outputCurrency) => {
       onCurrencySelection(Field.OUTPUT, outputCurrency)
       toggleHideSavings(false)
-      if (outputCurrency.symbol.toLowerCase() !== 'bnb') {
+      if (outputCurrency.symbol.toLowerCase() !== 'bnb' && outputCurrency.address.toLowerCase() !== testnetBnb) {
         const tokenData = defaultTokenJson.tokens.find(t => t.symbol === outputCurrency.symbol)
         if (tokenData) { setNonNativeToken({
           name: tokenData.name,
@@ -391,15 +393,18 @@ const Swap = () => {
     const tax = taxes.find(t => t['isTotal'])
     const taxAmount = tax ? tax['sellAmount'].replace('%', '') : '0'
     return setTaxSavings(nonNativeToken.typicalSellTax - parseFloat(taxAmount))
-  }, [taxes, isBuyingNonNativeToken])
+  }, [taxes, isBuyingNonNativeToken, trade])
 
   const taxSavingsText = () => {
     if (!nonNativeToken) return ''
     let text = `${nonNativeToken?.symbol} usually has a `
+    const pawSwapTotalTax = taxes.find(t => t['isTotal'])
     if (isBuyingNonNativeToken) {
-      text += `buy tax of ${nonNativeToken.typicalBuyTax}%. `
+      const pawSwapTotalTaxAmt = pawSwapTotalTax ? pawSwapTotalTax['buyAmount'] : '0%'
+      text += `buy tax of ${nonNativeToken.typicalBuyTax}% but you only pay ${pawSwapTotalTaxAmt} on PawSwap! `
     } else {
-      text += `sell tax of ${nonNativeToken.typicalSellTax}%. `
+      const pawSwapTotalTaxAmt = pawSwapTotalTax ? pawSwapTotalTax['sellAmount'] : '0%'
+      text += `sell tax of ${nonNativeToken.typicalSellTax}%.  but you only pay ${pawSwapTotalTaxAmt} on PawSwap! `
     }
     text += `Would you consider donating a portion of your transaction to a good cause?`
     return text

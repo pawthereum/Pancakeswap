@@ -1,7 +1,7 @@
 import { ChainId, JSBI, Percent, Token, WETH } from '@pancakeswap-libs/sdk'
 
-export const ROUTER_ADDRESS = '0xc2a8dD01aabB1e21bF2535Ca1C222ffC916e6609'
-export const PAWSWAP_ADDRESS = '0xEa315BB312D6aDDc5d1F4365C1aCdfa81194404E'
+export const ROUTER_ADDRESS = '0x2b7f2Ac4128b2Af8bc289a4e496869542A4f0d90'
+export const PAWSWAP_ADDRESS = '0x576327584691e4c334a73002f67020adbb8120b3'
 
 export const PAWTH_CHARITY_WALLET = '0x9e84fe006aa1c290f4cbcd78be32131cbf52cb23'
 
@@ -19,8 +19,8 @@ export const DAI = new Token(swapChainId, '0x1AF3F329e8BE154074D8769D1FFa4eE058B
 export const BUSD = new Token(swapChainId, '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', 18, 'BUSD', 'Binance USD');
 export const USDT = new Token(swapChainId, '0x55d398326f99059fF775485246999027B3197955', 18, 'USDT', 'Tether USD');
 export const ETH = new Token(swapChainId, '0x2170Ed0880ac9A755fd29B2688956BD959F933F8', 18, 'ETH', 'Ethereum');
-export const WBNB = new Token(swapChainId, '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c', 18, 'WBNB', 'Wrapped BNB');
-export const PAWTH = new Token(swapChainId, '0x409e215738E31d8aB252016369c2dd9c2008Fee0', 9, 'PAWTH', 'Pawthereum')
+export const WBNB = new Token(swapChainId, '0xae13d989dac2f0debff460ac112a837c89baa7cd', 18, 'WBNB', 'Wrapped BNB');
+export const PAWTH = new Token(swapChainId, '0x3bae287fF1754bB2D390bFF103C998F9479B049d', 9, 'PAWTH', 'Pawthereum')
 
 const WETH_ONLY: ChainTokenList = {
   [ChainId.MAINNET]: [WETH[ChainId.MAINNET]],
