@@ -6,7 +6,7 @@ import { BigNumber } from '@ethersproject/bignumber'
 import { abi as IUniswapV2Router02ABI } from '@uniswap/v2-periphery/build/IUniswapV2Router02.json'
 import { abi as IPawswapABI } from '../constants/abis/pawswap.json'
 import { abi as ITaxStructureABI } from '../constants/abis/taxStructure.json'
-import { ChainId, JSBI, Percent, Token, CurrencyAmount, Currency, ETHER } from '@pancakeswap-libs/sdk'
+import { ChainId, JSBI, Percent, Token, CurrencyAmount, Currency, ETHER } from 'plugins/pawswap-libs/sdk'
 import { ROUTER_ADDRESS, PAWSWAP_ADDRESS } from '../constants'
 import { TokenAddressMap } from '../state/lists/hooks'
 
