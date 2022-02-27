@@ -1,6 +1,6 @@
-import { Trade, TradeType } from '@pancakeswap-libs/sdk'
+import { Trade, TradeType } from 'plugins/pawswap-libs/sdk'
 import React, { useMemo, useState } from 'react'
-import { Text, Button } from '@pancakeswap-libs/uikit'
+import { Text, Button } from 'plugins/pawswap-libs/uikit'
 import { Repeat } from 'react-feather'
 
 import useI18n from 'hooks/useI18n'

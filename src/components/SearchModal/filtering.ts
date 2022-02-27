@@ -1,4 +1,4 @@
-import { Token } from '@pancakeswap-libs/sdk'
+import { Token } from 'plugins/pawswap-libs/sdk'
 import { isAddress } from '../../utils'
 
 interface Wallet {

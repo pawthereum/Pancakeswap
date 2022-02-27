@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'
-import { Currency, Pair } from '@pancakeswap-libs/sdk'
-import { Button, ChevronDownIcon, Tag, Text } from '@pancakeswap-libs/uikit'
+import { Currency, Pair } from 'plugins/pawswap-libs/sdk'
+import { Button, ChevronDownIcon, Tag, Text } from 'plugins/pawswap-libs/uikit'
 import styled from 'styled-components'
 import { darken } from 'polished'
 import useI18n from 'hooks/useI18n'
